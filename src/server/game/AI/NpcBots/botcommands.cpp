@@ -2,6 +2,7 @@
 #include "botdump.h"
 #include "botmgr.h"
 #include "botdatamgr.h"
+#include "botwanderful.h"
 #include "Chat.h"
 #include "CharacterCache.h"
 #include "Creature.h"
@@ -26,8 +27,6 @@
 #include "WorldDatabase.h"
 #include "WorldSession.h"
 #include "QueryPackets.h"
-
-#include <iomanip>
 
 /*
 Name: script_bot_commands
@@ -283,241 +282,26 @@ private:
 
     struct BotInfo
     {
-            explicit BotInfo(uint32 Id, std::string&& Name, uint8 Race) : id(Id), name(std::move(Name)), race(Race) {}
-            uint32 id;
-            std::string name;
-            uint8 race;
-
-            BotInfo (BotInfo&&) noexcept = default;
-            BotInfo& operator=(BotInfo&&) noexcept = default;
-
-            BotInfo() = delete;
-            BotInfo(BotInfo const&) = delete;
-            BotInfo& operator=(BotInfo const&) = delete;
+        explicit BotInfo(uint32 Id, std::string&& Name, uint8 Race) : id(Id), name(std::move(Name)), race(Race) {}
+        uint32 id;
+        std::string name;
+        uint8 race;
     };
 public:
     script_bot_commands() : CommandScript("script_bot_commands") { }
-
-    class WanderNode : public Position
-    {
-        using node_ltype = std::list<WanderNode*>;
-        using node_mtype = std::unordered_map<uint32 /*mapId*/, node_ltype>;
-
-        static node_ltype ALL_WPS;
-        static node_mtype ALL_WPS_PER_MAP;
-        static node_mtype ALL_WPS_PER_ZONE;
-        static node_mtype ALL_WPS_PER_AREA;
-
-    public:
-        enum BotWPFlags : uint32 {
-            BOTWP_FLAG_SPAWN            = 0x00000001,
-            BOTWP_FLAG_ALLIANCE_ONLY    = 0x00000002,
-            BOTWP_FLAG_HORDE_ONLY       = 0x00000004,
-            BOTWP_FLAG_CAN_BACKTRACK_TO = 0x00000008,
-            BOTWP_FLAG_END              = 0x00000010
-        };
-
-        static node_ltype const* GetAllWPs() {
-            return &ALL_WPS;
-        }
-        static node_ltype const* GetMapWPs(uint32 mapId) {
-            if (ALL_WPS_PER_MAP.find(mapId) == ALL_WPS_PER_MAP.cend())
-                return nullptr;
-            return &ALL_WPS_PER_MAP.at(mapId);
-        }
-        static node_ltype const* GetZoneWPs(uint32 zoneId) {
-            if (ALL_WPS_PER_ZONE.find(zoneId) == ALL_WPS_PER_ZONE.cend())
-                return nullptr;
-            return &ALL_WPS_PER_ZONE.at(zoneId);
-        }
-        static node_ltype const* GetAreaWPs(uint32 areaId) {
-            if (ALL_WPS_PER_AREA.find(areaId) == ALL_WPS_PER_AREA.cend())
-                return nullptr;
-            return &ALL_WPS_PER_AREA.at(areaId);
-        }
-        static bool IsWP(Creature const* creature) {
-            return creature && std::find_if(ALL_WPS.cbegin(), ALL_WPS.cend(), [=](WanderNode const* wp) {
-                return wp->GetCreature() == creature;
-            }) != ALL_WPS.cend();
-        }
-        static WanderNode* FindInAllWPs(uint32 wpId) {
-            auto ci = std::find_if(ALL_WPS.cbegin(), ALL_WPS.cend(), [wpId = wpId](WanderNode const* wp) {
-                return wp->GetWPId() == wpId;
-            });
-            return ci == ALL_WPS.cend() ? nullptr : *ci;
-        }
-        static WanderNode* FindInAllWPs(Creature const* creature) {
-            if (!creature) return nullptr;
-            auto ci = std::find_if(ALL_WPS.cbegin(), ALL_WPS.cend(), [=](WanderNode const* wp) {
-                return wp->GetCreature() == creature;
-            });
-            return ci == ALL_WPS.cend() ? nullptr : *ci;
-        }
-        static WanderNode* FindInMapWPs(Creature const* creature, uint32 mapId) {
-            if (!creature) return nullptr;
-            auto cim = ALL_WPS_PER_MAP.find(mapId);
-            if (cim == ALL_WPS_PER_MAP.cend())
-                return nullptr;
-            auto ci = std::find_if(ALL_WPS_PER_MAP.at(mapId).cbegin(), ALL_WPS_PER_MAP.at(mapId).cend(), [=](WanderNode const* wp) {
-                return wp->GetCreature() == creature;
-            });
-            return ci == ALL_WPS_PER_MAP.at(mapId).cend() ? nullptr : *ci;
-        }
-        static WanderNode* FindInMapWPs(uint32 wpId, uint32 mapId) {
-            auto cim = ALL_WPS_PER_MAP.find(mapId);
-            if (cim == ALL_WPS_PER_MAP.cend())
-                return nullptr;
-            auto ci = std::find_if(ALL_WPS_PER_MAP.at(mapId).cbegin(), ALL_WPS_PER_MAP.at(mapId).cend(), [wpId = wpId](WanderNode const* wp) {
-                return wp->GetWPId() == wpId;
-            });
-            return ci == ALL_WPS_PER_MAP.at(mapId).cend() ? nullptr : *ci;
-        }
-
-        WanderNode(uint32 wpId, uint32 mapId, float x, float y, float z, float o, uint32 zoneId, uint32 areaId, std::string const& name)
-            : Position(x,y,z,o),
-            _wpId(wpId), _mapId(mapId), _zoneId(zoneId), _areaId(areaId), _name(name), _minLevel(1u), _maxLevel(MAX_LEVEL), _flags(0),
-            wpc(nullptr)
-        {
-            ASSERT_NOTNULL(sMapStore.LookupEntry(_mapId));
-            ASSERT_NOTNULL(sAreaTableStore.LookupEntry(_zoneId));
-            ASSERT_NOTNULL(sAreaTableStore.LookupEntry(_areaId));
-            ALL_WPS.push_back(this);
-            ALL_WPS_PER_MAP[_mapId].push_back(this);
-            ALL_WPS_PER_ZONE[_zoneId].push_back(this);
-            ALL_WPS_PER_AREA[_areaId].push_back(this);
-        }
-        ~WanderNode() {
-            ALL_WPS_PER_AREA.at(_areaId).remove(this);
-            ALL_WPS_PER_ZONE.at(_zoneId).remove(this);
-            ALL_WPS_PER_MAP.at(_mapId).remove(this);
-            ALL_WPS.remove(this);
-            while (!_links.empty())
-                UnLink(_links.front());
-            if (wpc && wpc->IsInWorld())
-                wpc->ToTempSummon()->DespawnOrUnsummon();
-        }
-
-        void SetCreature(Creature* creature) { if (creature != nullptr) { ASSERT(!wpc); } wpc = creature; }
-        Creature* GetCreature() const { return wpc; }
-
-        std::string FormatLinks() const {
-            std::ostringstream lss;
-            for (WanderNode* lwp : _links)
-                lss << lwp->GetWPId() << ":0 "; //TODO: chance
-            return lss.str();
-        };
-
-        void Link(WanderNode* wp) {
-            if (!HasLink(wp))
-            {
-                _links.push_back(wp);
-                wp->Link(this);
-            }
-        }
-
-        void UnLink(WanderNode* wp) {
-            if (HasLink(wp))
-            {
-                _links.remove(wp);
-                wp->UnLink(this);
-            }
-        }
-
-        bool HasLink(WanderNode const* wp) const {
-            return std::find(_links.cbegin(), _links.cend(), wp) != _links.cend();
-        }
-
-        auto GetLinks() const -> typename std::add_const_t<WanderNode::node_ltype>& {
-            return _links;
-        }
-
-        void SetLevels(uint8 minLevel, uint8 maxLevel) {
-            std::tie(_minLevel, _maxLevel) = { minLevel, maxLevel };
-        }
-
-        void SetFlags(BotWPFlags flags) {
-            _flags |= AsUnderlyingType(flags);
-        }
-
-        void RemoveFlags(BotWPFlags flags) {
-            _flags &= ~AsUnderlyingType(flags);
-        }
-
-        bool HasFlag(BotWPFlags flags) const {
-            return !!(_flags & AsUnderlyingType(flags));
-        }
-
-        std::string ToString() const {
-            std::ostringstream wps;
-            wps << "WP " << _wpId << " '" << _name << "', " << uint32(_links.size()) << " link(s)" << ", Map " << _mapId
-                << ", Zone " << _zoneId << " (" << std::string(sAreaTableStore.LookupEntry(_zoneId)->AreaName[0])
-                << "), Area " << _areaId << " (" << std::string(sAreaTableStore.LookupEntry(_areaId)->AreaName[0])
-                << "), minLvl " << uint32(_minLevel) << ", maxLvl " << uint32(_maxLevel)
-                << " (" << static_cast<Position const*>(this)->ToString() << ')'
-                << ", flags: 0x" << std::hex << std::setw(8) << std::setfill('0') << _flags << std::dec;
-
-            return wps.str();
-        }
-
-        uint32 GetWPId() const {
-            return _wpId;
-        }
-
-        uint32 GetMapId() const {
-            return _mapId;
-        }
-
-        uint32 GetZoneId() const {
-            return _zoneId;
-        }
-
-        uint32 GetAreaId() const {
-            return _areaId;
-        }
-
-        std::string const& GetName() const {
-            return _name;
-        }
-
-        std::pair<uint8, uint8> GetLevels() const {
-            return { _minLevel, _maxLevel };
-        }
-
-        uint32 GetFlags() const {
-            return _flags;
-        }
-
-    private:
-        const uint32 _wpId;
-        const uint32 _mapId;
-        const uint32 _zoneId;
-        const uint32 _areaId;
-        const std::string _name;
-        uint8 _minLevel;
-        uint8 _maxLevel;
-        uint32 _flags;
-
-        node_ltype _links;
-
-        Creature* wpc;
-    };
 
     class WanderNode_AI : public CreatureAI
     {
     public:
         WanderNode_AI(Creature* creature, WanderNode* wp) : CreatureAI(creature), _wp(wp)
-        {
-            wp->SetCreature(creature);
-        }
+        { _wp->SetCreature(me); }
         ~WanderNode_AI()
-        {
-            _wp->SetCreature(nullptr);
-        }
+        { _wp->SetCreature(nullptr); }
 
         bool CanAIAttack(Unit const*) const override { return false; }
+        void MoveInLineOfSight(Unit*) override {}
+        void AttackStart(Unit*) override {}
         void UpdateAI(uint32) override {}
-
-        WanderNode* GetWP() const { return _wp; }
 
     private:
         WanderNode* const _wp;
@@ -766,18 +550,18 @@ public:
                 maxLevel = MAX_LEVEL;
             }
 
-            if (flags >= AsUnderlyingType(WanderNode::BotWPFlags::BOTWP_FLAG_END))
+            if (flags >= AsUnderlyingType(BotWPFlags::BOTWP_FLAG_END))
             {
                 handler->PSendSysMessage("WP %u has invalid flags %u! Removing all invalid flags...",
                     id, flags);
-                flags &= (AsUnderlyingType(WanderNode::BotWPFlags::BOTWP_FLAG_END) - 1);
+                flags &= (AsUnderlyingType(BotWPFlags::BOTWP_FLAG_END) - 1);
             }
 
             WanderNode* wp = new WanderNode(id, mapId, x, y, z, o, zoneId, areaId, name);
             HandleWPSummon(wp);
             ASSERT_NOTNULL(wp);
             wp->SetLevels(minLevel, maxLevel);
-            wp->SetFlags(WanderNode::BotWPFlags(flags));
+            wp->SetFlags(BotWPFlags(flags));
 
             if (!lstr)
             {
@@ -1058,9 +842,9 @@ public:
 
         WanderNode* ai = wp;
         if (*flags < 0)
-            ai->RemoveFlags(WanderNode::BotWPFlags(-*flags));
+            ai->RemoveFlags(BotWPFlags(-*flags));
         else
-            ai->SetFlags(WanderNode::BotWPFlags(*flags));
+            ai->SetFlags(BotWPFlags(*flags));
 
         uint32 wpId = wp->GetWPId();
         uint32 wpFlags = wp->GetFlags();
@@ -1115,9 +899,9 @@ public:
 
         if (flags)
         {
-            if (*flags >= AsUnderlyingType(WanderNode::BotWPFlags::BOTWP_FLAG_END))
+            if (*flags >= AsUnderlyingType(BotWPFlags::BOTWP_FLAG_END))
             {
-                handler->PSendSysMessage("Flags must below %u!", AsUnderlyingType(WanderNode::BotWPFlags::BOTWP_FLAG_END));
+                handler->PSendSysMessage("Flags must below %u!", AsUnderlyingType(BotWPFlags::BOTWP_FLAG_END));
                 handler->SetSentErrorMessage(true);
                 return false;
             }
@@ -1135,7 +919,7 @@ public:
         if (minlevel)
             ai->SetLevels(*minlevel, maxlevel ? *maxlevel : MAX_LEVEL);
         if (flags)
-            ai->SetFlags(WanderNode::BotWPFlags(*flags));
+            ai->SetFlags(BotWPFlags(*flags));
 
         auto [minl, maxl] = ai->GetLevels();
         std::ostringstream ss;
@@ -3610,11 +3394,6 @@ void AddSC_script_bot_commands()
 {
     new script_bot_commands();
 }
-
-script_bot_commands::WanderNode::node_ltype script_bot_commands::WanderNode::ALL_WPS = {};
-script_bot_commands::WanderNode::node_mtype script_bot_commands::WanderNode::ALL_WPS_PER_MAP = {};
-script_bot_commands::WanderNode::node_mtype script_bot_commands::WanderNode::ALL_WPS_PER_ZONE = {};
-script_bot_commands::WanderNode::node_mtype script_bot_commands::WanderNode::ALL_WPS_PER_AREA = {};
 
 #ifdef _MSC_VER
 # pragma warning(pop)
