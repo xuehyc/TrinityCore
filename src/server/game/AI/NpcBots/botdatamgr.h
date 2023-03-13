@@ -164,10 +164,11 @@ class BotDataMgr
         static uint8 GetLevelBonusForBotRank(uint32 rank);
         static uint8 GetMaxLevelForMapId(uint32 mapId);
         static uint8 GetMinLevelForBotClass(uint8 m_class);
-        static std::pair<uint8, uint8> GetZoneLevels(uint32 zoneId);
-        static std::pair<uint32 /*nodeId*/, Position const*> GetWanderMapNode(uint32 mapId, uint32 curNodeId, uint32 lastNodeId, uint8 lvl);
-        static Position const* GetWanderMapNodePosition(uint32 mapId, uint32 nodeId);
+        static TeamId GetTeamForFaction(uint32 factionTemplateId);
+        static std::pair<uint32, Position const*> GetNextWanderNode(uint32 mapId, uint32 curNodeId, uint32 lastNodeId, uint8 lvl, Position const* curpos);
+        static Position GetWanderMapNodePosition(uint32 mapId, uint32 nodeId);
         static std::string GetWanderMapNodeName(uint32 mapId, uint32 nodeId);
+        static std::pair<uint8, uint8> GetWanderMapNodeLevels(uint32 mapId, uint32 nodeId);
 
         static std::shared_mutex* GetLock();
 

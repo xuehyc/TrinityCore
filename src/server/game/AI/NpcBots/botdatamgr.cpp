@@ -2,6 +2,7 @@
 #include "botdatamgr.h"
 #include "botmgr.h"
 #include "botspell.h"
+#include "botwanderful.h"
 #include "Containers.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
@@ -36,241 +37,190 @@ NpcBotRegistry _existingBots;
 CreatureTemplateContainer _botsWanderCreatureTemplates;
 std::unordered_map<uint32, EquipmentInfo const*> _botsWanderCreatureEquipmentTemplates;
 
-static constexpr char const* WanderMapCreationQuery =
-    "CREATE TABLE IF NOT EXISTS `creature_wander_nodes` ("
-    "`id` int(10) unsigned NOT NULL,"
-    "`mapid` smallint(5) unsigned NOT NULL DEFAULT '0',"
-    "`zoneid` int(10) unsigned NOT NULL DEFAULT '0',"
-    "`x` float NOT NULL DEFAULT '0',"
-    "`y` float NOT NULL DEFAULT '0',"
-    "`z` float NOT NULL DEFAULT '0',"
-    "`o` float NOT NULL DEFAULT '0',"
-    "`name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',"
-    "PRIMARY KEY (`id`)"
-    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Bot Wander Map'";
-static constexpr float NODE_CONNECTION_DIST_MAX = 1800.f;
-static constexpr float NODE_CONNECTION_DIST_MAX_GEN = 370.f;
-static constexpr std::array wanderMapIds{ 0u, 1u };
-
 static bool allBotsLoaded = false;
 
-class BotTravelGraph
+void LoadWanderMap(bool reload = false)
 {
-public:
-    ~BotTravelGraph() {
-        //order
-        Tops.clear();
-        Nodes.clear();
-    }
-
-    struct BotTravelNode : public WorldLocation
+    if (WanderNode::GetAllWPsCount() > 0u)
     {
-        BotTravelNode(uint32 _mapId = MAPID_INVALID, float x = 0.f, float y = 0.f, float z = 0.f, float o = 0.f,
-            uint32 _id = 0, uint32 _zoneId = 0, uint8 _minlevel = 0, uint8 _maxlevel = 0, std::string const& _name = "unknown") :
-            WorldLocation(_mapId, x, y, z, o), id(_id), zoneId(_zoneId), minlevel(_minlevel), maxlevel(_maxlevel), name(_name) {}
-        BotTravelNode(uint32 _mapId, Position const& pos, uint32 _id, uint32 _zoneId, uint8 _minlevel, uint8 _maxlevel, std::string const& _name) :
-            WorldLocation(_mapId, pos), id(_id), zoneId(_zoneId), minlevel(_minlevel), maxlevel(_maxlevel), name(_name) {}
+        if (!reload)
+            return;
 
-        uint32 id;
-        uint32 zoneId;
-        uint8 minlevel;
-        uint8 maxlevel;
-        std::string name;
-
-        std::vector<BotTravelNode*> connections;
-    };
-
-    std::unordered_map<uint32 /*mapId*/, std::unordered_map<uint32, BotTravelNode>> Nodes;
-    std::vector<BotTravelNode*> Tops; // single connection nodes
-
-    // debug
-    static constexpr size_t sizeofNode = sizeof(BotTravelNode);
-} static WanderMap;
-
-void GenerateWanderNodes()
-{
-    using NodeType = BotTravelGraph::BotTravelNode;
-
-    for (GameTeleContainer::value_type const& tele_pair : sObjectMgr->GetGameTeleMap())
-    {
-        GameTele const& tele = tele_pair.second;
-        if (std::find(std::cbegin(wanderMapIds), std::cend(wanderMapIds), tele.mapId) == wanderMapIds.cend())
-            continue;
-
-        Position pos(tele.position_x, tele.position_y, tele.position_z, tele.orientation);
-        uint32 teleZoneId = sMapMgr->GetZoneId(PHASEMASK_NORMAL, tele.mapId, pos);
-        auto [lvlmin, lvlmax] = BotDataMgr::GetZoneLevels(teleZoneId);
-        if (lvlmin == 0 || lvlmax == 0)
-            continue;
-
-        WanderMap.Nodes[tele.mapId][tele_pair.first] = NodeType(tele.mapId, pos, tele_pair.first, teleZoneId, lvlmin, lvlmax, tele.name);
+        WanderNode::RemoveAllWPs();
     }
-
-    for (decltype(WanderMap.Nodes)::value_type& mapNodes1 : WanderMap.Nodes)
-    {
-        for (decltype(mapNodes1.second)::iterator it = mapNodes1.second.begin(); it != mapNodes1.second.end();)
-        {
-            for (auto& nodepair2 : WanderMap.Nodes.at(it->second.m_mapId))
-            {
-                if (it->first == nodepair2.first)
-                    continue;
-
-                float dist2d = it->second.GetExactDist2d(nodepair2.second);
-                if (dist2d < NODE_CONNECTION_DIST_MAX_GEN)
-                    it->second.connections.push_back(&nodepair2.second);
-            }
-
-            if (it->second.connections.empty())
-                it = mapNodes1.second.erase(it);
-            else
-                ++it;
-        }
-    }
-
-    uint32 total_nodes = 0;
-    for (decltype(WanderMap.Nodes)::value_type& mapNodes1 : WanderMap.Nodes)
-        total_nodes += mapNodes1.second.size();
-
-    if (total_nodes == 0)
-    {
-        TC_LOG_FATAL("server.loading", "Failed to generate wander points: no game_tele points added!");
-        ASSERT(false);
-    }
-
-    TC_LOG_INFO("server.loading", "Generated %u nodes, saving...", total_nodes);
-
-    std::ostringstream ss;
-    ss.setf(std::ios_base::fixed);
-    ss.precision(4);
-    ss << "INSERT INTO creature_wander_nodes (id, mapid, zoneid, x, y, z, o, name) VALUES ";
-    for (auto const& vt : WanderMap.Nodes)
-    {
-        for (auto const& nvt : vt.second)
-        {
-            auto const& n = nvt.second;
-            ss << '('
-                << n.id << ',' << n.m_mapId << ',' << n.zoneId << ','
-                << n.m_positionX << ',' << n.m_positionY << ',' << n.m_positionZ << ',' << n.GetOrientation() << ','
-                << '\'' << n.name << '\''
-                << "),";
-        }
-    }
-
-    std::string qstring = ss.str();
-    qstring.resize(qstring.size() - 1);
-    //TC_LOG_INFO("scripts", "Executing: %s", qstring.c_str());
-
-    WorldDatabase.DirectExecute(qstring.c_str());
-
-    TC_LOG_INFO("server.loading", "Successfully exported %u nodes", total_nodes);
-}
-
-void FillWanderMap()
-{
-    using NodeType = BotTravelGraph::BotTravelNode;
-
-    //TC_LOG_INFO("server.loading", "Loading bot wander map...");
 
     uint32 botoldMSTime = getMSTime();
 
-    WorldDatabase.DirectExecute(WanderMapCreationQuery);
-    QueryResult tableExists = WorldDatabase.Query("SELECT * from creature_wander_nodes LIMIT 1");
-    if (!tableExists)
-    {
-        TC_LOG_WARN("server.loading", "Table `creature_wander_nodes` is empty. Trying to re-generate nodes... (this is a one-time action)");
-        GenerateWanderNodes();
-    }
+    TC_LOG_INFO("server.loading", "Setting up wander map...");
 
-    QueryResult wres = WorldDatabase.Query("SELECT id, mapid, zoneid, x, y, z, o, name FROM creature_wander_nodes");
+    QueryResult wres = WorldDatabase.Query("SELECT id,mapid,x,y,z,o,zoneId,areaId,minlevel,maxlevel,flags,name,links FROM creature_template_npcbot_wander_nodes ORDER BY mapid,id");
     if (!wres)
     {
-        TC_LOG_FATAL("server.loading", "Failed to load wander points: table `creature_wander_nodes` is empty!");
+        TC_LOG_FATAL("server.loading", "Failed to load wander points: table `creature_template_npcbot_wander_nodes` is empty!");
         ASSERT(false);
     }
 
+    bool spawn_node_exists = false;
+    std::unordered_map<uint32, std::pair<WanderNode*, std::vector<std::vector<std::string_view>>>> links_to_create;
     do
     {
         Field* fields = wres->Fetch();
         uint32 index = 0;
 
-        uint32 id             = fields[  index].GetUInt32();
-        uint32 mapid          = fields[++index].GetUInt16();
-
-        if (std::find(std::cbegin(wanderMapIds), std::cend(wanderMapIds), mapid) == wanderMapIds.cend())
-            continue;
-
-        uint32 zoneId         = fields[++index].GetUInt32();
-
-        auto [lvlmin, lvlmax] = BotDataMgr::GetZoneLevels(zoneId);
-        if (lvlmin == 0 || lvlmax == 0)
-            continue;
-
+        uint32 id        = fields[  index].GetUInt32();
+        uint32 mapId     = fields[++index].GetUInt16();
         float x          = fields[++index].GetFloat();
         float y          = fields[++index].GetFloat();
         float z          = fields[++index].GetFloat();
         float o          = fields[++index].GetFloat();
+        uint32 zoneId    = fields[++index].GetUInt32();
+        uint32 areaId    = fields[++index].GetUInt32();
+        uint8 minLevel   = fields[++index].GetUInt8();
+        uint8 maxLevel   = fields[++index].GetUInt8();
+        uint32 flags     = fields[++index].GetUInt32();
         std::string name = fields[++index].GetString();
+        char const* lstr = fields[++index].GetCString();
 
-        WanderMap.Nodes[mapid][id] = NodeType(mapid, x, y, z, o, id, zoneId, lvlmin, lvlmax, name);
+        WanderNode::nextWPId = std::max<uint32>(WanderNode::nextWPId, id);
+        spawn_node_exists |= !!(flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_SPAWN));
+
+        if (!minLevel || !maxLevel || minLevel > DEFAULT_MAX_LEVEL || maxLevel > DEFAULT_MAX_LEVEL || minLevel > maxLevel)
+        {
+            TC_LOG_WARN("server.loading", "WP %u has invalid levels min %u max %u! Setting to default...",
+                id, uint32(minLevel), uint32(maxLevel));
+            minLevel = 1;
+            maxLevel = DEFAULT_MAX_LEVEL;
+        }
+
+        if (flags >= AsUnderlyingType(BotWPFlags::BOTWP_FLAG_END))
+        {
+            TC_LOG_WARN("server.loading", "WP %u has invalid flags %u! Removing all invalid flags...", id, flags);
+            flags &= (AsUnderlyingType(BotWPFlags::BOTWP_FLAG_END) - 1);
+        }
+
+        const uint32 conflicting_flags_1 = AsUnderlyingType(BotWPFlags::BOTWP_FLAG_ALLIANCE_ONLY) | AsUnderlyingType(BotWPFlags::BOTWP_FLAG_HORDE_ONLY);
+        if ((flags & conflicting_flags_1) == conflicting_flags_1)
+        {
+            TC_LOG_WARN("server.loading", "WP %u has conflicting flags %u+%u! Removing both...",
+                id, AsUnderlyingType(BotWPFlags::BOTWP_FLAG_ALLIANCE_ONLY), AsUnderlyingType(BotWPFlags::BOTWP_FLAG_HORDE_ONLY));
+            flags &= ~conflicting_flags_1;
+        }
+
+        WanderNode* wp = new WanderNode(id, mapId, x, y, z, o, zoneId, areaId, name);
+        wp->SetLevels(minLevel, maxLevel);
+        wp->SetFlags(BotWPFlags(flags));
+
+        if (!lstr)
+        {
+            TC_LOG_WARN("server.loading", "WP %u has no links!", id);
+            continue;
+        }
+        std::vector<std::string_view> tok = Trinity::Tokenize(lstr, ' ', false);
+        for (std::vector<std::string_view>::size_type i = 0; i != tok.size(); ++i)
+        {
+            std::vector<std::string_view> link_str = Trinity::Tokenize(tok[i], ':', false);
+            ASSERT(link_str.size() == 2u, "Invalid links_str format: '%s'", tok[i].data());
+            ASSERT(Trinity::StringTo<uint32>(link_str[0]) != std::nullopt, "Invalid links_str format: '%s'", tok[i].data());
+            ASSERT(Trinity::StringTo<uint32>(link_str[1]) != std::nullopt, "Invalid links_str format: '%s'", tok[i].data());
+
+            if (links_to_create.find(id) == links_to_create.cend())
+                links_to_create[id] = { wp, {std::move(link_str)} };
+            else
+                links_to_create.at(id).second.push_back(std::move(link_str));
+        }
 
     } while (wres->NextRow());
 
-    uint32 total_connections = 0;
+    if (!spawn_node_exists)
+    {
+        TC_LOG_FATAL("server.loading", "Not a single spawn node exists! Spawning wandering bots is impossible! Aborting.");
+        ASSERT(false);
+    }
+
+    uint32 total_ribs = 0;
     float mindist = 50000.f;
     float maxdist = 0.f;
-    for (decltype(WanderMap.Nodes)::value_type& mapNodes1 : WanderMap.Nodes)
+    for (auto const& vt : links_to_create)
     {
-        for (decltype(mapNodes1.second)::iterator it = mapNodes1.second.begin(); it != mapNodes1.second.end();)
+        for (auto const& vec : vt.second.second)
         {
-            for (auto& nodepair2 : WanderMap.Nodes.at(it->second.m_mapId))
+            uint32 lid = *Trinity::StringTo<uint32>(vec[0]);
+            if (lid == vt.first)
             {
-                if (it->first == nodepair2.first)
-                    continue;
-
-                float dist2d = it->second.GetExactDist2d(nodepair2.second);
-                if (dist2d < NODE_CONNECTION_DIST_MAX)
-                {
-                    if (dist2d < mindist)
-                        mindist = dist2d;
-                    if (dist2d > maxdist)
-                        maxdist = dist2d;
-
-                    it->second.connections.push_back(&nodepair2.second);
-                    if (nodepair2.second.connections.empty() ||
-                        std::find(std::cbegin(nodepair2.second.connections), std::cend(nodepair2.second.connections), &it->second) == nodepair2.second.connections.cend())
-                        ++total_connections;
-                }
+                TC_LOG_WARN("server.loading", "WP %u has link %u which links to itself! Skipped.", vt.first, lid);
+                continue;
             }
 
-            if (it->second.connections.empty())
-                it = mapNodes1.second.erase(it);
-            else
+            WanderNode* lwp = WanderNode::FindInAllWPs(lid);
+            if (!lwp)
             {
-                if (it->second.connections.size() == 1u)
-                {
-                    WanderMap.Tops.push_back(&it->second);
-                    if (it->second.connections.front()->connections.size() == 1)
-                        TC_LOG_INFO("server.loading", "Node pair %u-%u is isolated!", it->second.id, it->second.connections.front()->id);
-                }
-                ++it;
+                TC_LOG_WARN("server.loading", "WP %u has link %u which does not exist!", vt.first, lid);
+                continue;
+            }
+            if (lwp->GetMapId() != vt.second.first->GetMapId())
+            {
+                TC_LOG_WARN("server.loading", "WP %u map %u has link %u ON A DIFFERENT MAP %u!",
+                    vt.first, vt.second.first->GetMapId(), lid, lwp->GetMapId());
+                continue;
+            }
+            if (vt.second.first->GetExactDist2d(lwp) > MAX_VISIBILITY_DISTANCE)
+                TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is too great (%.2f)",
+                    vt.first, lid, vt.second.first->GetExactDist2d(lwp));
+
+            if (!vt.second.first->HasLink(lwp))
+            {
+                ++total_ribs;
+                vt.second.first->Link(lwp);
+                float dist2d = vt.second.first->GetExactDist2d(lwp);
+                if (dist2d < mindist)
+                    mindist = dist2d;
+                if (dist2d > maxdist)
+                    maxdist = dist2d;
             }
         }
     }
 
-    uint32 total_nodes = 0;
-    for (auto const& vt : WanderMap.Nodes)
-    {
-        total_nodes += vt.second.size();
-        if (vt.second.empty())
+    std::set<WanderNode const*> tops;
+    WanderNode::DoForAllWPs([&](WanderNode const* wp) {
+        if (tops.count(wp) == 0u && wp->GetLinks().size() == 1u)
         {
-            TC_LOG_FATAL("server.loading", "Failed to load wander points: no game_tele points added to map %u!", vt.first);
-            ASSERT(false);
+            TC_LOG_INFO("server.loading", "Node %u ('%s') has single connection!", wp->GetWPId(), wp->GetName().c_str());
+            WanderNode const* tn = wp->GetLinks().front();
+            std::vector<WanderNode const*> sc_chain;
+            sc_chain.push_back(wp);
+            while (tn != wp)
+            {
+                if (tn->GetLinks().size() != 2u)
+                    break;
+                uint32 prevId = sc_chain.back()->GetWPId();
+                sc_chain.push_back(tn);
+                tn = *std::find_if_not(std::cbegin(tn->GetLinks()), std::cend(tn->GetLinks()), [nId = prevId](WanderNode const* lwp) {
+                    return lwp->GetWPId() == nId;
+                });
+            }
+            if (sc_chain.size() > 1u)
+            {
+                TC_LOG_INFO("server.loading", "Node %u ('%s') has single connection!", tn->GetWPId(), tn->GetName().c_str());
+                sc_chain.push_back(tn);
+                tops.emplace(sc_chain.front());
+                tops.emplace(sc_chain.back());
+                std::ostringstream ss;
+                ss << "Node " << (sc_chain.size() == 2u ? "pair " : "chain ");
+                for (uint32 i = 0u; i < sc_chain.size(); ++i)
+                {
+                    ss << sc_chain[i]->GetWPId();
+                    if (i < sc_chain.size() - 1u)
+                        ss << '-';
+                }
+                ss << " is isolated!";
+                TC_LOG_INFO("server.loading", ss.str().c_str());
+            }
         }
-    }
+    });
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u bot wander nodes on %u maps (total %u ribs, %u tops) in %u ms",
-        total_nodes, uint32(WanderMap.Nodes.size()), total_connections, uint32(WanderMap.Tops.size()), GetMSTimeDiffToNow(botoldMSTime));
-    TC_LOG_INFO("server.loading", "Nodes distances: min = %.3f, max = %.3f", mindist, maxdist);
+    TC_LOG_INFO("server.loading", ">> Loaded %u bot wander nodes on %u maps (total %u ribs, %u tops) in %u ms. Distances: min %.3f, max %.3f",
+        uint32(WanderNode::GetAllWPsCount()), uint32(WanderNode::GetWPMapsCount()), total_ribs, tops.size(),
+        GetMSTimeDiffToNow(botoldMSTime), mindist, maxdist);
 }
 
 std::shared_mutex* BotDataMgr::GetLock()
@@ -540,7 +490,7 @@ void BotDataMgr::LoadNpcBotGroupData()
 
 void BotDataMgr::GenerateWanderingBots()
 {
-    using NodeType = BotTravelGraph::BotTravelNode;
+    using NodeVec = std::vector<WanderNode const*>;
 
     const std::map<uint8, uint32> wbot_faction_for_ex_class = {
         {BOT_CLASS_BM, 2u},
@@ -553,12 +503,12 @@ void BotDataMgr::GenerateWanderingBots()
         {BOT_CLASS_SEA_WITCH, 14u}
     };
 
-    const uint32 WANDERING_BOTS_COUNT = BotMgr::GetDesiredWanderingBotsCount();
+    const uint32 wandering_bots_desired = BotMgr::GetDesiredWanderingBotsCount();
 
-    if (WANDERING_BOTS_COUNT == 0)
+    if (wandering_bots_desired == 0)
         return;
 
-    FillWanderMap();
+    LoadWanderMap();
 
     TC_LOG_INFO("server.loading", "Spawning wandering bots...");
 
@@ -585,10 +535,10 @@ void BotDataMgr::GenerateWanderingBots()
         if (spareBotIdsPerClassMap.find(c) != spareBotIdsPerClassMap.cend() && spareBotIdsPerClassMap.at(c).empty())
             spareBotIdsPerClassMap.erase(c);
 
-    if (maxWanderingBots < WANDERING_BOTS_COUNT)
+    if (maxWanderingBots < wandering_bots_desired)
     {
         TC_LOG_FATAL("server.loading", "Only %u out of %u bots of enabled classes aren't spawned. Desired amount of wandering bots (%u) cannot be created. Aborting!",
-            maxWanderingBots, uint32(_botsExtras.size()), WANDERING_BOTS_COUNT);
+            maxWanderingBots, uint32(_botsExtras.size()), wandering_bots_desired);
         ASSERT(false);
     }
 
@@ -625,29 +575,77 @@ void BotDataMgr::GenerateWanderingBots()
             spareBotIdsPerClassMap.erase(bclass);
     };
 
+    NodeVec spawns_a, spawns_h, spawns_rest;
+    for (NodeVec* vec : { &spawns_a, &spawns_h, &spawns_rest })
+        vec->reserve(WanderNode::GetAllWPsCount() / (WanderNode::GetWPMapsCount() + 1u));
+
+    WanderNode::DoForAllWPs([&](WanderNode* wp) {
+        uint32 flags = wp->GetFlags();
+        if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_SPAWN))
+        {
+            if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_ALLIANCE_ONLY))
+                spawns_a.push_back(wp);
+            else if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_HORDE_ONLY))
+                spawns_h.push_back(wp);
+            else
+                spawns_rest.push_back(wp);
+        }
+    });
+
     std::set<uint32> botgrids;
-    for (int32 i = 0; i < int32(WANDERING_BOTS_COUNT); ++i) // i is unused as value
+    for (uint32 i = 1; i <= wandering_bots_desired; ++i) // i is a counter, NOT used as index or value
     {
         while (all_templates.find(++bot_id) != all_templates.cend()) {}
 
         uint8 bot_class = Trinity::Containers::SelectRandomContainerElement(spareBotIdsPerClassMap).first;
         CreatureTemplate const* orig_template = find_bot_creature_template_by_botclass(bot_class);
         ASSERT(orig_template);
-
-        CreatureTemplate& bot_template = _botsWanderCreatureTemplates[bot_id];
-        //copy all fields
-        //pointers to non-const objects: QueryData[TOTAL_LOCALES]
-        bot_template = *orig_template;
-        bot_template.Entry = bot_id;
-        //bot_template.Name = bot_template.Name;
-        bot_template.Title = "";
-        //possibly need to override whole array (and pointer)
-        bot_template.InitializeQueryData();
-
         NpcBotExtras const* orig_extras = SelectNpcBotExtras(orig_template->Entry);
         ASSERT_NOTNULL(orig_extras);
         ChrRacesEntry const* rentry = sChrRacesStore.LookupEntry(orig_extras->race);
         uint32 bot_faction = (bot_class >= BOT_CLASS_EX_START) ? wbot_faction_for_ex_class.find(bot_class)->second : rentry ? rentry->FactionID : 14;
+
+        NodeVec* bot_spawn_nodes;
+        TeamId bot_team = GetTeamForFaction(bot_faction);
+        switch (bot_team)
+        {
+            case TEAM_ALLIANCE:
+                bot_spawn_nodes = &spawns_a;
+                break;
+            case TEAM_HORDE:
+                bot_spawn_nodes = &spawns_h;
+                break;
+            default:
+                bot_spawn_nodes = &spawns_rest;
+                break;
+        }
+        NodeVec level_nodes;
+        level_nodes.reserve(bot_spawn_nodes->size());
+        uint8 myminlevel = GetMinLevelForBotClass(bot_class);
+        for (WanderNode const* node : *bot_spawn_nodes)
+        {
+            auto [minlevel, maxlevel] = node->GetLevels();
+            if (myminlevel >= minlevel && myminlevel <= maxlevel)
+                level_nodes.push_back(node);
+        }
+
+        WanderNode const* spawnLoc = level_nodes.empty() ? nullptr : Trinity::Containers::SelectRandomContainerElement(level_nodes);
+        if (!spawnLoc)
+        {
+            TC_LOG_WARN("server.loading", "No viable nodes found for bot %s id %u orig id %u class %u race %u faction %u team %u. Skipping.",
+                orig_template->Name.c_str(), bot_id, orig_template->Entry, uint32(orig_extras->bclass), uint32(orig_extras->race),
+                bot_faction, uint32(bot_team));
+            --i;
+            --bot_id;
+            continue;
+        }
+
+        CreatureTemplate& bot_template = _botsWanderCreatureTemplates[bot_id];
+        //copy all fields
+        bot_template = *orig_template;
+        bot_template.Entry = bot_id;
+        bot_template.Title = "";
+        bot_template.InitializeQueryData();
 
         NpcBotData* bot_data = new NpcBotData(bot_ai::DefaultRolesForClass(bot_class), bot_faction, bot_ai::DefaultSpecForClass(bot_class));
         _botsData[bot_id] = bot_data;
@@ -671,26 +669,17 @@ void BotDataMgr::GenerateWanderingBots()
 
         //We do not create CreatureData for generated bots
 
-        NodeType const* spawnLoc = nullptr;
-        do
-        {
-            auto const& spair = Trinity::Containers::SelectRandomContainerElement(Trinity::Containers::SelectRandomContainerElement(WanderMap.Nodes).second);
-            if (spair.second.maxlevel >= GetMinLevelForBotClass(bot_class))
-                spawnLoc = &spair.second;
-
-        } while (spawnLoc == nullptr);
-
         CellCoord c = Trinity::ComputeCellCoord(spawnLoc->m_positionX, spawnLoc->m_positionY);
         GridCoord g = Trinity::ComputeGridCoord(spawnLoc->m_positionX, spawnLoc->m_positionY);
         ASSERT(c.IsCoordValid(), "Invalid Cell coord!");
         ASSERT(g.IsCoordValid(), "Invalid Grid coord!");
-        Map* map = sMapMgr->CreateBaseMap(spawnLoc->m_mapId);
+        Map* map = sMapMgr->CreateBaseMap(spawnLoc->GetMapId());
         map->LoadGrid(spawnLoc->m_positionX, spawnLoc->m_positionY);
         ASSERT(!map->Instanceable(), map->GetDebugInfo().c_str());
 
         TC_LOG_INFO("npcbots", "Spawning wandering bot: %s (%u) class %u race %u fac %u, location: mapId %u %s (%s)",
             bot_template.Name.c_str(), bot_id, uint32(bot_extras->bclass), uint32(bot_extras->race), bot_data->faction,
-            spawnLoc->m_mapId, spawnLoc->ToString().c_str(), spawnLoc->name.c_str());
+            spawnLoc->GetMapId(), spawnLoc->ToString().c_str(), spawnLoc->GetName().c_str());
         Position spos;
         spos.Relocate(spawnLoc->m_positionX, spawnLoc->m_positionY, spawnLoc->m_positionZ, spawnLoc->GetOrientation());
         Creature* bot = new Creature();
@@ -707,7 +696,8 @@ void BotDataMgr::GenerateWanderingBots()
             ASSERT(false);
         }
 
-        bot->GetBotAI()->SetTravelNodeCur(spawnLoc->id);
+        bot->GetBotAI()->SetTravelNodeCur(spawnLoc->GetWPId());
+        bot->GetBotAI()->SetShouldUpdateStats();
 
         remove_bot_orig_entry_from_available(bot_class, orig_template->Entry);
 
@@ -1239,157 +1229,106 @@ uint8 BotDataMgr::GetMinLevelForBotClass(uint8 m_class)
     }
 }
 
-std::pair<uint8, uint8> BotDataMgr::GetZoneLevels(uint32 zoneId)
+TeamId BotDataMgr::GetTeamForFaction(uint32 factionTemplateId)
 {
-    //Only maps 0 and 1 are covered
-    switch (zoneId)
-    {
-        case 1: // Dun Morogh
-        case 12: // Elwynn Forest
-        case 14: // Durotar
-        case 85: // Tirisfal Glades
-        case 141: // Teldrassil
-        case 215: // Mulgore
-        case 3430: // Eversong Woods
-        case 3524: // Azuremyst Isle
-            return { 1, 12 };
-        case 38: // Loch Modan
-        case 40: // Westfall
-        case 130: // Silverpine Woods
-        case 148: // Darkshore
-        case 3433: // Ghostlands
-        case 3525: // Bloodmyst Isle
-            return { 8, 22 };
-        case 17: // Barrens
-        case 721: // Gnomeregan
-            return { 8, 28 };
-        case 44: // Redridge Mountains
-            return { 13, 28 };
-        case 406: // Stonetalon Mountains
-            return { 13, 30 };
-        case 10: // Duskwood
-        case 11: // Wetlands
-        case 267: // Hillsbrad Foothills
-        case 331: // Ashenvale
-            return { 18, 32 };
-        case 400: // Thousand Needles
-            return { 23, 38 };
-        case 36: // Alterac Mountains
-        case 45: // Arathi Highlands
-        case 405: // Desolace
-            return { 28, 42 };
-        case 33: // Stranglethorn Valley
-            return { 28, 48 };
-        case 3: // Badlands
-        case 8: // Swamp of Sorrows
-        case 15: // Dustwallow Marsh
-            return { 33, 48 };
-        case 47: // Hinterlands
-        case 357: // Feralas
-        case 440: // Tanaris
-            return { 38, 52 };
-        case 4: // Blasted Lands
-        case 16: // Azshara
-        case 51: // Searing Gorge
-            return { 43, 54 };
-        case 490: // Un'Goro Crater
-            return { 45, 56 };
-        case 361: // Felwood
-            return { 46, 56 };
-        case 28: // Western Plaguelands
-        case 46: // Burning Steppes
-            return { 48, 56 };
-        case 41: // Deadwind Pass
-            return { 50, 60 };
-        case 1377: // Silithus
-        case 2017: // Stratholme
-            return { 53, 60 };
-        case 139: // Eastern Plaguelands
-        case 618: // Winterspring
-            return { 53, 60 }; //63
-        default:
-            TC_LOG_ERROR("scripts", "GetZoneLevels: no choice for zoneId %u", zoneId);
-            return { 50, 60 };
-    }
+    FactionTemplateEntry const* fte = sFactionTemplateStore.LookupEntry(factionTemplateId);
+    if (!fte)
+        return TEAM_NEUTRAL;
+    else if (fte->FactionGroup & FACTION_MASK_ALLIANCE)
+        return TEAM_ALLIANCE;
+    else if (fte->FactionGroup & FACTION_MASK_HORDE)
+        return TEAM_HORDE;
+    else
+        return TEAM_NEUTRAL;
 }
 
-std::pair<uint32, Position const*> BotDataMgr::GetWanderMapNode(uint32 mapId, uint32 curNodeId, uint32 lastNodeId, uint8 lvl)
+std::pair<uint32, Position const*> BotDataMgr::GetNextWanderNode(uint32 mapId, uint32 curNodeId, uint32 lastNodeId, uint8 lvl, Position const* curpos)
 {
-    decltype(WanderMap.Nodes)::const_iterator cit = WanderMap.Nodes.find(mapId);
-    if (cit != WanderMap.Nodes.cend())
+    using NodeVec = std::vector<WanderNode const*>;
+
+    WanderNode const* node_cur = WanderNode::FindInMapWPs(curNodeId, mapId);
+
+    //Node got deleted! Select closest and go from there
+    if (!node_cur)
     {
-        decltype(WanderMap.Nodes)::value_type::second_type::const_iterator ici = cit->second.find(curNodeId);
-        if (ici != cit->second.cend())
-        {
-            std::vector<decltype(WanderMap)::BotTravelNode const*> convec;
-            if (ici->second.connections.size() == 1)
-                convec.push_back(ici->second.connections.front());
-            else
+        float mindist = MAX_VISIBILITY_DISTANCE * 2.0f;
+        WanderNode const* node_new = nullptr;
+        WanderNode::DoForAllMapWPs(mapId, [curpos = curpos, &mindist, &node_new](WanderNode const* wp) {
+            float dist = curpos->GetExactDist2d(wp);
+            if (dist < mindist)
             {
-                uint8 minlevel = 255;
-                for (auto const* con : ici->second.connections)
-                {
-                    if (con->id != lastNodeId && lvl >= con->minlevel && lvl <= con->maxlevel + 3)
-                        convec.push_back(con);
-                    if (con->maxlevel < minlevel)
-                        minlevel = con->maxlevel;
-                }
-                if (convec.empty())
-                {
-                    for (auto const* con : ici->second.connections)
-                    {
-                        if (con->id != lastNodeId && con->maxlevel == minlevel)
-                            convec.push_back(con);
-                    }
-                }
-                if (convec.empty())
-                {
-                    for (auto const* con : ici->second.connections)
-                    {
-                        if (con->maxlevel == minlevel)
-                            convec.push_back(con);
-                    }
-                }
-                if (convec.empty())
-                {
-                    for (auto const* con : ici->second.connections)
-                    {
-                        if (con->id != lastNodeId)
-                            convec.push_back(con);
-                    }
-                }
+                mindist = dist;
+                node_new = wp;
             }
-            ASSERT(!convec.empty());
-            auto* randomNode = (convec.size() == 1) ? convec.front() : Trinity::Containers::SelectRandomContainerElement(convec);
-            return std::make_pair(randomNode->id, static_cast<Position const*>(randomNode));
+        });
+
+        if (node_new)
+            return { node_new->GetWPId(), static_cast<Position const*>(node_new) };
+
+        return { 0, nullptr };
+    }
+
+    auto const& links = node_cur->GetLinks();
+    NodeVec convec;
+    if (links.size() == 1u)
+        convec.push_back(links.front());
+    else
+    {
+        convec.reserve(node_cur->GetLinks().size());
+        for (WanderNode const* link : node_cur->GetLinks())
+        {
+            auto [minlevel, maxlevel] = link->GetLevels();
+            if (link->GetWPId() != lastNodeId && lvl + 3 >= minlevel && lvl <= maxlevel + 3)
+                convec.push_back(link);
+        }
+        if (convec.empty())
+        {
+            for (WanderNode const* link : node_cur->GetLinks())
+            {
+                if (link->GetWPId() != lastNodeId && lvl >= link->GetLevels().first)
+                    convec.push_back(link);
+            }
+        }
+        if (convec.empty())
+        {
+            for (WanderNode const* link : node_cur->GetLinks())
+            {
+                if (link->GetWPId() != lastNodeId && lvl >= link->GetLevels().first)
+                    convec.push_back(link);
+            }
+        }
+        if (convec.empty())
+        {
+            for (WanderNode const* link : node_cur->GetLinks())
+            {
+                if (link->GetWPId() != lastNodeId)
+                    convec.push_back(link);
+            }
         }
     }
+
+    if (WanderNode const* wp = convec.empty() ? nullptr : convec.size() == 1u ? convec.front() : Trinity::Containers::SelectRandomContainerElement(convec))
+        return std::make_pair(wp->GetWPId(), static_cast<Position const*>(wp));
 
     return { 0, nullptr };
 }
 
-Position const* BotDataMgr::GetWanderMapNodePosition(uint32 mapId, uint32 nodeId)
+Position BotDataMgr::GetWanderMapNodePosition(uint32 mapId, uint32 nodeId)
 {
-    decltype(WanderMap.Nodes)::const_iterator cit = WanderMap.Nodes.find(mapId);
-    if (cit != WanderMap.Nodes.cend())
-    {
-        decltype(WanderMap.Nodes)::value_type::second_type::const_iterator ici = cit->second.find(nodeId);
-        if (ici != cit->second.cend())
-            return static_cast<Position const*>(&ici->second);
-    }
-    return nullptr;
+    WanderNode const* node_cur = WanderNode::FindInMapWPs(nodeId, mapId);
+    return node_cur ? node_cur->GetPosition() : Position{};
 }
 
 std::string BotDataMgr::GetWanderMapNodeName(uint32 mapId, uint32 nodeId)
 {
-    decltype(WanderMap.Nodes)::const_iterator cit = WanderMap.Nodes.find(mapId);
-    if (cit != WanderMap.Nodes.cend())
-    {
-        decltype(WanderMap.Nodes)::value_type::second_type::const_iterator ici = cit->second.find(nodeId);
-        if (ici != cit->second.cend())
-            return ici->second.name;
-    }
-    return {};
+    WanderNode const* node_cur = WanderNode::FindInMapWPs(nodeId, mapId);
+    return node_cur ? node_cur->GetName() : std::string{};
+}
+
+std::pair<uint8, uint8> BotDataMgr::GetWanderMapNodeLevels(uint32 mapId, uint32 nodeId)
+{
+    WanderNode const* node_cur = WanderNode::FindInMapWPs(nodeId, mapId);
+    return node_cur ? node_cur->GetLevels() : std::pair<uint8, uint8>{1, 1};
 }
 
 #ifdef _MSC_VER

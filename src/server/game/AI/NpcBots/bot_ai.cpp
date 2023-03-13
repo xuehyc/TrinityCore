@@ -2230,16 +2230,21 @@ void bot_ai::SetStats(bool force)
     {
         if (_baseLevel == 0) //this only happens once
         {
-            auto [zonelevelmin, zonelevelmax] = BotDataMgr::GetZoneLevels(me->GetZoneId());
-            ASSERT(zonelevelmin > 0 && zonelevelmax > 0);
-            mylevel = std::min<uint8>(urand(std::max<uint8>(zonelevelmin + 2, zonelevelmax), zonelevelmax), zonelevelmax);
-            mylevel += BotDataMgr::GetLevelBonusForBotRank(me->GetCreatureTemplate()->rank);
-            _baseLevel = mylevel;
+            if (_travel_node_cur > 0)
+            {
+                auto [minlevel, maxlevel] = BotDataMgr::GetWanderMapNodeLevels(me->GetMap()->GetEntry()->ID, _travel_node_cur);
+                ASSERT(minlevel > 0 && minlevel > 0);
+                mylevel = std::min<uint8>(urand(std::min<uint8>(minlevel + 2, maxlevel), maxlevel), maxlevel);
+                mylevel += BotDataMgr::GetLevelBonusForBotRank(me->GetCreatureTemplate()->rank);
+                _baseLevel = mylevel;
+                TC_LOG_DEBUG("npcbots", "Wandering bot %s id %u selected level %u...", me->GetName().c_str(), me->GetEntry(), uint32(_baseLevel));
+            }
         }
         else
         {
             uint8 mapmaxlevel = BotDataMgr::GetMaxLevelForMapId(me->GetMap()->GetEntry()->ID);
             mapmaxlevel += BotDataMgr::GetLevelBonusForBotRank(me->GetCreatureTemplate()->rank);
+            //TODO: experience system for levelups
             mylevel = std::max<uint8>(mylevel, std::min<uint8>(_baseLevel + uint8(_killsCount / std::max<uint8>(mylevel * 5 / 2, 20)), mapmaxlevel));
         }
     }
@@ -16828,20 +16833,21 @@ void bot_ai::UpdateReviveTimer(uint32 diff)
                 uint32 nextNodeId = GetNextTravelNode(homepos);
                 if (!nextNodeId)
                 {
-                    TC_LOG_ERROR("scripts", "Bot %s (%u) is unable to get next travel node (1)! cur %u, last %u, position: %s. BOT WAS DISABLED",
+                    TC_LOG_FATAL("scripts", "Bot %s (%u) is unable to get next travel node (1)! cur %u, last %u, position: %s. BOT WAS DISABLED",
                         me->GetName().c_str(), me->GetEntry(), _travel_node_cur, _travel_node_last, me->GetPosition().ToString().c_str());
                     canUpdate = false;
                     return;
                 }
 
-                std::string nodeName = BotDataMgr::GetWanderMapNodeName(me->GetMapId(), nextNodeId);
-                TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u died on the way from node %u to %u, NEW %u ('%s'), %s, dist %.1f yd!",
+                std::string nodeNameCur = BotDataMgr::GetWanderMapNodeName(me->GetMapId(), _travel_node_cur);
+                std::string nodeNameNext = BotDataMgr::GetWanderMapNodeName(me->GetMapId(), nextNodeId);
+                TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u died on the way from node %u ('%s') to %u, NEW %u ('%s'), %s, dist %.1f yd!",
                     me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), _travel_node_last, _travel_node_cur,
-                    nextNodeId, nodeName.c_str(), homepos.ToString().c_str(), me->GetExactDist(homepos));
+                    nodeNameCur.c_str(), nextNodeId, nodeNameNext.c_str(), homepos.ToString().c_str(), me->GetExactDist(homepos));
 
                 _travel_node_last = _travel_node_cur;
                 _travel_node_cur = nextNodeId;
-                _travelHistory.push_back(std::make_pair(nextNodeId, nodeName));
+                _travelHistory.push_back(std::make_pair(nextNodeId, nodeNameNext));
                 return;
             }
         }
@@ -17180,7 +17186,7 @@ uint32 bot_ai::GetNextTravelNode(Position& pos) const
 {
     ASSERT(IsWanderer());
 
-    auto [nodeId, nodePos] = BotDataMgr::GetWanderMapNode(me->GetMapId(), _travel_node_cur, _travel_node_last, me->GetLevel());
+    auto [nodeId, nodePos] = BotDataMgr::GetNextWanderNode(me->GetMapId(), _travel_node_cur, _travel_node_last, me->GetLevel(), me);
     if (!nodePos)
         return 0;
 

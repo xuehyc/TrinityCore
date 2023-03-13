@@ -3,7 +3,9 @@
 
 #include "Position.h"
 
+#include <functional>
 #include <list>
+#include <shared_mutex>
 #include <unordered_map>
 
 /*
@@ -27,62 +29,49 @@ class WanderNode : public Position
     using node_ltype = std::list<WanderNode*>;
     using node_mtype = std::unordered_map<uint32, node_ltype>;
 
+    using node_proc_ftype = std::function<void(WanderNode*)>;
+    using node_proc_ftype_c = std::function<void(WanderNode const*)>;
+
+    using mutex_type = std::recursive_mutex;
+    using lock_type = std::unique_lock<mutex_type>;
+
     static node_ltype ALL_WPS;
     static node_mtype ALL_WPS_PER_MAP;
     static node_mtype ALL_WPS_PER_ZONE;
     static node_mtype ALL_WPS_PER_AREA;
 
 public:
-    static node_ltype const* GetAllWPs() {
-        return &ALL_WPS;
+    static uint32 nextWPId;
+
+    static mutex_type* GetLock();
+
+    static bool IsWP(Creature const* creature);
+    static WanderNode* FindInAllWPs(uint32 wpId);
+    static WanderNode* FindInAllWPs(Creature const* creature);
+    static WanderNode* FindInMapWPs(Creature const* creature, uint32 mapId);
+    static WanderNode* FindInMapWPs(uint32 wpId, uint32 mapId);
+
+    template<typename Container, typename Func>
+    static void DoForContainerWPs(Container const& c, Func&& func) {
+        static_assert(std::is_same_v<std::decay_t<std::remove_pointer_t<typename Container::value_type>>, WanderNode>);
+        static_assert(std::is_convertible_v<Func, node_proc_ftype>);
+        lock_type lock(*GetLock());
+        for (auto* wp : c)
+            func(wp);
     }
-    static node_ltype const* GetContainerWPs(node_mtype const& c, uint32 key) {
-        node_mtype::const_iterator ci = c.find(key);
-        return ci == c.cend() ? nullptr : &ci->second;
-    }
-    inline static node_ltype const* GetMapWPs(uint32 mapId) { return GetContainerWPs(ALL_WPS_PER_MAP, mapId); }
-    inline static node_ltype const* GetZoneWPs(uint32 zoneId) { return GetContainerWPs(ALL_WPS_PER_ZONE, zoneId); }
-    inline static node_ltype const* GetAreaWPs(uint32 areaId) { return GetContainerWPs(ALL_WPS_PER_AREA, areaId); }
-    static bool IsWP(Creature const* creature) {
-        return creature && std::find_if(ALL_WPS.cbegin(), ALL_WPS.cend(), [=](WanderNode const* wp) {
-            return wp->GetCreature() == creature;
-        }) != ALL_WPS.cend();
-    }
-    static WanderNode* FindInAllWPs(uint32 wpId) {
-        auto ci = std::find_if(ALL_WPS.cbegin(), ALL_WPS.cend(), [wpId = wpId](WanderNode const* wp) {
-            return wp->GetWPId() == wpId;
-        });
-        return ci == ALL_WPS.cend() ? nullptr : *ci;
-    }
-    static WanderNode* FindInAllWPs(Creature const* creature) {
-        if (!creature) return nullptr;
-        auto ci = std::find_if(ALL_WPS.cbegin(), ALL_WPS.cend(), [=](WanderNode const* wp) {
-            return wp->GetCreature() == creature;
-        });
-        return ci == ALL_WPS.cend() ? nullptr : *ci;
-    }
-    static WanderNode* FindInMapWPs(Creature const* creature, uint32 mapId) {
-        if (!creature) return nullptr;
-        auto cim = ALL_WPS_PER_MAP.find(mapId);
-        if (cim == ALL_WPS_PER_MAP.cend())
-            return nullptr;
-        auto ci = std::find_if(ALL_WPS_PER_MAP.at(mapId).cbegin(), ALL_WPS_PER_MAP.at(mapId).cend(), [=](WanderNode const* wp) {
-            return wp->GetCreature() == creature;
-        });
-        return ci == ALL_WPS_PER_MAP.at(mapId).cend() ? nullptr : *ci;
-    }
-    static WanderNode* FindInMapWPs(uint32 wpId, uint32 mapId) {
-        auto cim = ALL_WPS_PER_MAP.find(mapId);
-        if (cim == ALL_WPS_PER_MAP.cend())
-            return nullptr;
-        auto ci = std::find_if(ALL_WPS_PER_MAP.at(mapId).cbegin(), ALL_WPS_PER_MAP.at(mapId).cend(), [wpId = wpId](WanderNode const* wp) {
-            return wp->GetWPId() == wpId;
-        });
-        return ci == ALL_WPS_PER_MAP.at(mapId).cend() ? nullptr : *ci;
-    }
+
+    static void DoForAllWPs(node_proc_ftype&& func);
+    static void DoForAllMapWPs(uint32 mapId, node_proc_ftype_c&& func);
+    static void DoForAllZoneWPs(uint32 zoneId, node_proc_ftype_c&& func);
+    static void DoForAllAreaWPs(uint32 areaId, node_proc_ftype_c&& func);
+    static size_t GetAllWPsCount();
+    static size_t GetWPMapsCount();
 
     WanderNode(uint32 wpId, uint32 mapId, float x, float y, float z, float o, uint32 zoneId, uint32 areaId, std::string const& name);
     ~WanderNode();
+
+    static void RemoveAllWPs();
+    static void RemoveWP(WanderNode* wp);
 
     void SetCreature(Creature* creature);
     Creature* GetCreature() const;
