@@ -3586,15 +3586,13 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell, bool secondary) cons
     }
 
     return
-        (target->IsAlive() && target->IsVisible() && me->IsValidAttackTarget(target) &&
-        target->isTargetableForAttack(false) && !IsInBotParty(target) &&
-        ((me->CanSeeOrDetect(target) && target->InSamePhase(me)) || CanSeeEveryone()) &&
+        ((master->IsInCombat() || target->IsInCombat() || IsWanderer()) &&
+        target->IsVisible() && target->isTargetableForAttack(false) && me->IsValidAttackTarget(target) &&
         (!master->IsAlive() || target->IsControlledByPlayer() ||
         (followdist > 0 && (master->GetDistance(target) <= foldist || HasBotCommandState(BOT_COMMAND_STAY)))) &&//if master is killed pursue to the end
+        !IsInBotParty(target) && (target->InSamePhase(me) || CanSeeEveryone()) &&
         (!HasBotCommandState(BOT_COMMAND_STAY) ||
         ((!IsRanged() && !secondary) ? me->IsWithinMeleeRange(target) : me->GetDistance(target) <= foldist)) &&//if stationery check own distance
-        (target->IsHostileTo(master) || target->IsHostileTo(me) ||//if master is controlled
-        (target->GetReactionTo(me) < REP_FRIENDLY && (master->IsInCombat() || target->IsInCombat() || IsWanderer()))) &&
         (byspell == -1 || !target->IsTotem()) &&
         (byspell == -1 || !mainMask || !target->IsImmunedToDamage(mainMask)));
 }
@@ -4277,7 +4275,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
         if (IsWanderer())
         {
             unitList.remove_if([me = me](Unit const* unit) -> bool {
-                if (!unit->IsInCombatWith(me) && (!unit->IsNPCBot() || !unit->ToCreature()->IsFreeBot()))
+                if (!unit->IsInCombatWith(me) && !(unit->IsNPCBot() && unit->ToCreature()->IsWandererBot()))
                 {
                     if (unit->IsPlayer())
                     {
@@ -16841,7 +16839,7 @@ void bot_ai::UpdateReviveTimer(uint32 diff)
 
                 std::string nodeNameCur = BotDataMgr::GetWanderMapNodeName(me->GetMapId(), _travel_node_cur);
                 std::string nodeNameNext = BotDataMgr::GetWanderMapNodeName(me->GetMapId(), nextNodeId);
-                TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u died on the way from node %u ('%s') to %u, NEW %u ('%s'), %s, dist %.1f yd!",
+                TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u died on the way from node %u to %u ('%s'), NEW %u ('%s'), %s, dist %.1f yd!",
                     me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), _travel_node_last, _travel_node_cur,
                     nodeNameCur.c_str(), nextNodeId, nodeNameNext.c_str(), homepos.ToString().c_str(), me->GetExactDist(homepos));
 

@@ -233,9 +233,11 @@ struct AreaPOIEntry
     uint32 ContinentID;                                     // 15
     //uint32 Flags;                                         // 16
     uint32 AreaID;                                          // 17
-    //char const* Name[16];                                 // 18-33
+    char const* Name;                                       // 18
+    //char const* Name[15];                                 // 19-33
     //uint32 Name_lang_mask;                                // 34
-    //char const* Description[16];                          // 35-50
+    char const* Description;                                // 35
+    //char const* Description[15];                          // 36-50
     //uint32 Description_lang_mask;                         // 51
     uint32 WorldStateID;                                    // 52
     //uint32 WorldMapLink;                                  // 53

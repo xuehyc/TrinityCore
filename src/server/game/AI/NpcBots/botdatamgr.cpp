@@ -39,7 +39,7 @@ std::unordered_map<uint32, EquipmentInfo const*> _botsWanderCreatureEquipmentTem
 
 static bool allBotsLoaded = false;
 
-void LoadWanderMap(bool reload = false)
+void BotDataMgr::LoadWanderMap(bool reload)
 {
     if (WanderNode::GetAllWPsCount() > 0u)
     {
@@ -83,6 +83,9 @@ void LoadWanderMap(bool reload = false)
 
         WanderNode::nextWPId = std::max<uint32>(WanderNode::nextWPId, id);
         spawn_node_exists |= !!(flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_SPAWN));
+
+        if (minLevel == 1u && maxLevel == DEFAULT_MAX_LEVEL)
+            TC_LOG_WARN("server.loading", "WP %u has no levels set.", id);
 
         if (!minLevel || !maxLevel || minLevel > DEFAULT_MAX_LEVEL || maxLevel > DEFAULT_MAX_LEVEL || minLevel > maxLevel)
         {
@@ -147,25 +150,29 @@ void LoadWanderMap(bool reload = false)
             uint32 lid = *Trinity::StringTo<uint32>(vec[0]);
             if (lid == vt.first)
             {
-                TC_LOG_WARN("server.loading", "WP %u has link %u which links to itself! Skipped.", vt.first, lid);
+                TC_LOG_ERROR("server.loading", "WP %u has link %u which links to itself! Skipped.", vt.first, lid);
                 continue;
             }
 
             WanderNode* lwp = WanderNode::FindInAllWPs(lid);
             if (!lwp)
             {
-                TC_LOG_WARN("server.loading", "WP %u has link %u which does not exist!", vt.first, lid);
+                TC_LOG_ERROR("server.loading", "WP %u has link %u which does not exist!", vt.first, lid);
                 continue;
             }
             if (lwp->GetMapId() != vt.second.first->GetMapId())
             {
-                TC_LOG_WARN("server.loading", "WP %u map %u has link %u ON A DIFFERENT MAP %u!",
+                TC_LOG_ERROR("server.loading", "WP %u map %u has link %u ON A DIFFERENT MAP %u!",
                     vt.first, vt.second.first->GetMapId(), lid, lwp->GetMapId());
                 continue;
             }
-            if (vt.second.first->GetExactDist2d(lwp) > MAX_VISIBILITY_DISTANCE)
+            float lwpdist2d = vt.second.first->GetExactDist2d(lwp);
+            if (lwpdist2d > MAX_VISIBILITY_DISTANCE)
                 TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is too great (%.2f)",
-                    vt.first, lid, vt.second.first->GetExactDist2d(lwp));
+                    vt.first, lid, lwpdist2d);
+            if (lwpdist2d < VISIBILITY_DISTANCE_NORMAL)
+                TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is low (%.2f)",
+                    vt.first, lid, lwpdist2d);
 
             if (!vt.second.first->HasLink(lwp))
             {
@@ -191,7 +198,11 @@ void LoadWanderMap(bool reload = false)
             while (tn != wp)
             {
                 if (tn->GetLinks().size() != 2u)
+                {
+                    if (tn->GetLinks().size() == 1u)
+                        sc_chain.push_back(tn);
                     break;
+                }
                 uint32 prevId = sc_chain.back()->GetWPId();
                 sc_chain.push_back(tn);
                 tn = *std::find_if_not(std::cbegin(tn->GetLinks()), std::cend(tn->GetLinks()), [nId = prevId](WanderNode const* lwp) {
@@ -201,7 +212,6 @@ void LoadWanderMap(bool reload = false)
             if (sc_chain.size() > 1u)
             {
                 TC_LOG_INFO("server.loading", "Node %u ('%s') has single connection!", tn->GetWPId(), tn->GetName().c_str());
-                sc_chain.push_back(tn);
                 tops.emplace(sc_chain.front());
                 tops.emplace(sc_chain.back());
                 std::ostringstream ss;
@@ -579,7 +589,8 @@ void BotDataMgr::GenerateWanderingBots()
     for (NodeVec* vec : { &spawns_a, &spawns_h, &spawns_rest })
         vec->reserve(WanderNode::GetAllWPsCount() / (WanderNode::GetWPMapsCount() + 1u));
 
-    WanderNode::DoForAllWPs([&](WanderNode* wp) {
+    /// @TODO: manage allowed world maps HERE: 0, 1 530, 571
+    WanderNode::DoForAllWPs([&spawns_a, &spawns_h, &spawns_rest](WanderNode const* wp) {
         uint32 flags = wp->GetFlags();
         if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_SPAWN))
         {
@@ -1251,7 +1262,7 @@ std::pair<uint32, Position const*> BotDataMgr::GetNextWanderNode(uint32 mapId, u
     //Node got deleted! Select closest and go from there
     if (!node_cur)
     {
-        float mindist = MAX_VISIBILITY_DISTANCE * 2.0f;
+        float mindist = 50000.0f; // Anywhere
         WanderNode const* node_new = nullptr;
         WanderNode::DoForAllMapWPs(mapId, [curpos = curpos, &mindist, &node_new](WanderNode const* wp) {
             float dist = curpos->GetExactDist2d(wp);

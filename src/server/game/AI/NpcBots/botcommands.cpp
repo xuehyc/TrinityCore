@@ -279,6 +279,112 @@ private:
 #undef FILL_VISUALS_REPORT2
     }
 
+    static std::pair<uint8, uint8> GetZoneLevels(uint32 zoneId)
+    {
+        //Only maps 0 and 1 are covered
+        switch (zoneId)
+        {
+            case 1: // Dun Morogh
+            case 12: // Elwynn Forest
+            case 14: // Durotar
+            case 85: // Tirisfal Glades
+            case 141: // Teldrassil
+            case 215: // Mulgore
+            case 3430: // Eversong Woods
+            case 3524: // Azuremyst Isle
+                return { 1, 10 };
+            case 38: // Loch Modan
+            case 40: // Westfall
+            case 130: // Silverpine Woods
+            case 148: // Darkshore
+            case 3433: // Ghostlands
+            case 3525: // Bloodmyst Isle
+            case 17: // Barrens
+            case 721: // Gnomeregan
+                return { 8, 20 };
+            case 44: // Redridge Mountains
+            case 406: // Stonetalon Mountains
+                return { 13, 25 };
+            case 10: // Duskwood
+            case 11: // Wetlands
+            case 267: // Hillsbrad Foothills
+            case 331: // Ashenvale
+                return { 18, 30 };
+            case 400: // Thousand Needles
+                return { 23, 35 };
+            case 36: // Alterac Mountains
+            case 45: // Arathi Highlands
+            case 405: // Desolace
+                return { 28, 40 };
+            case 33: // Stranglethorn Valley
+            case 3: // Badlands
+            case 8: // Swamp of Sorrows
+            case 15: // Dustwallow Marsh
+                return { 33, 45 };
+            case 47: // Hinterlands
+            case 357: // Feralas
+            case 440: // Tanaris
+                return { 38, 50 };
+            case 4: // Blasted Lands
+            case 16: // Azshara
+            case 51: // Searing Gorge
+                return { 43, 54 };
+            case 490: // Un'Goro Crater
+            case 361: // Felwood
+                return { 46, 56 };
+            case 28: // Western Plaguelands
+            case 46: // Burning Steppes
+                return { 48, 56 };
+            case 41: // Deadwind Pass
+                return { 50, 60 };
+            case 1377: // Silithus
+            case 2017: // Stratholme
+            case 139: // Eastern Plaguelands
+            case 618: // Winterspring
+                return { 53, 60 };
+            default:
+                TC_LOG_ERROR("scripts", "GetZoneLevels: no choice for zoneId %u", zoneId);
+                return { 1, 60 };
+        }
+    }
+
+    static bool IsNoWPZone(uint32 zoneId)
+    {
+        //Only maps 0 and 1 are covered
+        switch (zoneId)
+        {
+            case 1477: // Moonglade
+            case 1519: // Stormwind
+            case 1537: // Ironforge
+            case 1637: // Orgrimmar
+            case 1638: // Thunder Bluff
+            case 1657: // Darnassus
+            case 3487: // Silvermoon
+            case 3557: // Exodar
+            case 493: // Moonglade
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    static uint32 GetZoneIdOverride(uint32 zoneId)
+    {
+        switch (zoneId)
+        {
+            case 718: // Wailing Caverns
+                return 17; // Barrens
+            case 1337: // Uldaman
+                return 3; // Badlands
+            case 2057: // Scholomance
+                return 139; // EPL
+            case 2100: // Maraudon
+                return 405; // Desolace
+            default:
+                return zoneId;
+        }
+    }
+
     struct BotInfo
     {
         explicit BotInfo(uint32 Id, std::string&& Name, uint8 Race) : id(Id), name(std::move(Name)), race(Race) {}
@@ -323,12 +429,15 @@ public:
         {
             { "",           HandleNpcBotWPInfoCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
             { "setlevels",  HandleNpcBotWPInfoSetLevelsCommand,     rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "setlevels z",HandleNpcBotWPInfoSetLevelsZoneCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::Yes },
             { "setflags",   HandleNpcBotWPInfoSetFlagsCommand,      rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
         };
 
         static ChatCommandTable npcbotWPCommandTable =
         {
+            //{ "generate",   HandleNpcBotWPGenerateCommand,          rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::Yes },
             { "spawnall",   HandleNpcBotWPSpawnAllCommand,          rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::Yes },
+            { "move",       HandleNpcBotWPMoveCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
             { "add",        HandleNpcBotWPAddCommand,               rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
             { "del",        HandleNpcBotWPDeleteCommand,            rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
             { "list",       HandleNpcBotWPListCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
@@ -495,11 +604,105 @@ public:
         wpc->SetPowerType(POWER_MANA);
         wpc->SetMaxPower(POWER_MANA, uint32(wp->GetLinks().size()));
         wpc->SetFullPower(POWER_MANA);
-        wpc->SetObjectScale(5.0f);
+        wpc->SetObjectScale(10.0f);
         return wpc;
     }
 
-    // todo: revamp so it only summons creatures, loading happens always in botdatamgr.cpp
+    static bool HandleNpcBotWPGenerateCommand(ChatHandler* handler, Optional<bool> save)
+    {
+        WanderNode::RemoveAllWPs();
+
+        handler->SendSysMessage("Generating wander nodes from POIs. No levels or flags will be set");
+
+        uint32 poiId_start = 0;
+        for (AreaPOIEntry const* aProto : sAreaPOIStore)
+        {
+            if (aProto->ContinentID != 0 && aProto->ContinentID != 1/* && aProto->ContinentID != 530 && aProto->ContinentID != 571*/)
+                continue;
+
+            uint32 poiId = ++poiId_start;
+            std::string poiName = aProto->Name;
+            if (strlen(aProto->Description) > 0)
+            {
+                poiName += " - ";
+                poiName += aProto->Description;
+            }
+            poiName.erase(std::remove_if(std::begin(poiName), std::end(poiName), [](char c) { return c == '\''; }), poiName.end());
+            uint32 poiMapId = aProto->ContinentID;
+            float x = aProto->Pos.X;
+            float y = aProto->Pos.Y;
+            float z = aProto->Pos.Z;
+            float o = frand(0.001f, float(M_PI + M_PI) - 0.001f);
+            float ground_z = sMapMgr->CreateBaseMap(poiMapId)->GetHeight(PHASEMASK_NORMAL, x, y, z);
+            if (ground_z > INVALID_HEIGHT)
+                z = ground_z;
+            uint32 poiZoneId, poiAreaId;
+            sMapMgr->GetZoneAndAreaId(PHASEMASK_NORMAL, poiZoneId, poiAreaId, poiMapId, x, y, z);
+
+            poiZoneId = GetZoneIdOverride(poiZoneId);
+            if (IsNoWPZone(poiZoneId))
+            {
+                --poiId_start;
+                continue;
+            }
+
+            WanderNode* wp = new WanderNode(poiId, poiMapId, x, y, z, o, poiZoneId, poiAreaId, poiName);
+            auto [minl, maxl] = GetZoneLevels(poiZoneId);
+            wp->SetLevels(minl, maxl);
+            BotWPFlags flags = BotWPFlags::BOTWP_FLAG_NONE;
+            wp->SetFlags(flags);
+            WanderNode::DoForAllMapWPs(poiMapId, [wp = wp](WanderNode const* mwp) {
+                if (mwp->GetWPId() != wp->GetWPId() && mwp->GetExactDist2d(wp) < MAX_VISIBILITY_DISTANCE)
+                    wp->Link(const_cast<WanderNode*>(mwp));
+            });
+
+            handler->SendSysMessage(wp->ToString().c_str());
+        }
+
+        handler->PSendSysMessage("Generating wander nodes completed with %u nodes", uint32(WanderNode::GetAllWPsCount()));
+
+        if (!(save && *save))
+            return true;
+
+        WorldDatabaseTransaction trans = WorldDatabase.BeginTransaction();
+        trans->Append("DROP TABLE IF EXISTS creature_wander_nodes_");
+        trans->Append(
+            "CREATE TABLE creature_wander_nodes_ ("
+            "  `id` int(10) unsigned NOT NULL,"
+            "  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'RENAME_ME',"
+            "  `mapid` smallint(5) unsigned NOT NULL DEFAULT '0',"
+            "  `zoneid` int(10) unsigned NOT NULL DEFAULT '0',"
+            "  `areaid` int(10) unsigned NOT NULL DEFAULT '0',"
+            "  `minlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',"
+            "  `maxlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',"
+            "  `flags` int(10) unsigned NOT NULL DEFAULT '0',"
+            "  `x` float NOT NULL DEFAULT '0',"
+            "  `y` float NOT NULL DEFAULT '0',"
+            "  `z` float NOT NULL DEFAULT '0',"
+            "  `o` float NOT NULL DEFAULT '0',"
+            "  `links` mediumtext COLLATE utf8mb4_unicode_ci,"
+            "  PRIMARY KEY (`id`)"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Bot Wander Map'"
+        );
+        std::ostringstream ss;
+        ss << "INSERT INTO creature_wander_nodes_ (id,mapid,x,y,z,o,zoneId,areaId,minlevel,maxlevel,flags,name,links) VALUES ";
+        WanderNode::DoForAllWPs([&ss](WanderNode const* wp) {
+            auto [minl, maxl] = wp->GetLevels();
+            ss << '(' << wp->GetWPId() << ',' << wp->GetMapId()
+                << ',' << wp->GetPositionX() << ',' << wp->GetPositionY() << ',' << wp->GetPositionZ() << ',' << wp->GetOrientation()
+                << ',' << wp->GetZoneId() << ',' << wp->GetAreaId() << ',' << uint32(minl) << ',' << uint32(maxl)
+                << ',' << wp->GetFlags() << ",'" << wp->GetName().c_str() << "','" << wp->FormatLinks() << "'),";
+        });
+        std::string val_str = ss.str();
+        val_str.resize(val_str.size() - 1u);
+        trans->PAppend(val_str.c_str());
+        WorldDatabase.CommitTransaction(trans);
+
+        handler->SendSysMessage("Saved.");
+
+        return true;
+    }
+
     static bool HandleNpcBotWPSpawnAllCommand(ChatHandler* handler)
     {
         if (!isWPSpawnWarningGiven)
@@ -511,6 +714,9 @@ public:
         }
         else
         {
+            if (WanderNode::GetAllWPsCount() == 0u)
+                BotDataMgr::LoadWanderMap();
+
             WanderNode::DoForAllWPs([](WanderNode* wp) {
                 if (Creature* wpc = wp->GetCreature())
                     wpc->ToTempSummon()->DespawnOrUnsummon();
@@ -573,7 +779,7 @@ public:
         else
         {
             WanderNode::DoForContainerWPs(linksCopy, [wp = wp, handler = handler](WanderNode* lwp) {
-                handler->PSendSysMessage("Removing link %u...", lwp->GetWPId());
+                handler->PSendSysMessage("Removing link %u<->%u...", wp->GetWPId(), lwp->GetWPId());
                 wp->UnLink(lwp);
             });
         }
@@ -593,7 +799,7 @@ public:
                 continue;
             }
 
-            handler->PSendSysMessage("Adding link %u...", lid);
+            handler->PSendSysMessage("Adding link %u<->%u...", wp->GetWPId(), lid);
             if (wp->GetExactDist2d(lwp) > MAX_VISIBILITY_DISTANCE)
                 handler->PSendSysMessage("Warning! Link distance is too great (%.2f)", wp->GetExactDist2d(lwp));
 
@@ -655,6 +861,37 @@ public:
         }
 
         handler->SendSysMessage(wp->ToString());
+
+        return true;
+    }
+    static bool HandleNpcBotWPInfoSetLevelsZoneCommand(ChatHandler* handler, Optional<uint8> minlevel, Optional<uint8> maxlevel)
+    {
+        Player* player = handler->GetPlayer();
+
+        if (!minlevel || !maxlevel)
+        {
+            handler->SendSysMessage("Syntax: npcbot wp info setlevels z #[minlevel] #[maxlevel]");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!*minlevel || !*maxlevel || *minlevel > DEFAULT_MAX_LEVEL || *maxlevel > DEFAULT_MAX_LEVEL || *minlevel > *maxlevel)
+        {
+            handler->PSendSysMessage("WP levels must be within bounds 1-%u, min <= max", uint32(DEFAULT_MAX_LEVEL));
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        uint32 zoneId, areaId;
+        player->GetZoneAndAreaId(zoneId, areaId);
+        handler->PSendSysMessage("Setting levels min=%u max=%u for zone %u", uint32(*minlevel), uint32(*maxlevel), zoneId);
+        WanderNode::DoForAllZoneWPs(zoneId, [handler = handler, minl = *minlevel, maxl = *maxlevel](WanderNode const* wp) {
+            handler->PSendSysMessage("Setting levels min=%u max=%u for node %u '%s'",
+                uint32(minl), uint32(maxl), wp->GetWPId(), wp->GetName().c_str());
+            const_cast<WanderNode*>(wp)->SetLevels(minl, maxl);
+            WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET minlevel=%u, maxlevel=%u WHERE id=%u",
+                uint32(minl), uint32(maxl), wp->GetWPId());
+        });
 
         return true;
     }
@@ -725,6 +962,39 @@ public:
         return true;
     }
 
+    static bool HandleNpcBotWPMoveCommand(ChatHandler* handler, Optional<uint32> wpId)
+    {
+        Player* player = handler->GetPlayer();
+        Unit* wpc = player->GetSelectedUnit();
+
+        WanderNode* wp = (wpc && wpc->GetTypeId() == TYPEID_UNIT) ? WanderNode::FindInAllWPs(wpc->ToCreature()) :
+            wpId ? WanderNode::FindInAllWPs(*wpId) : nullptr;
+        if (!wp)
+        {
+            handler->SendSysMessage("No WP selected or id provided");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (wp->GetMapId() != player->GetMapId())
+        {
+            handler->SendSysMessage("Can't move WP to a different map!");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        wp->Relocate(player);
+        if (Creature* creature = wp->GetCreature())
+            creature->NearTeleportTo(*player);
+
+        WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET x=%f,y=%f,z=%f,o=%f WHERE id=%u",
+            wp->m_positionX, wp->m_positionY, wp->m_positionZ, wp->GetOrientation(), wp->GetWPId());
+
+        handler->PSendSysMessage("WP %u '%s' was successfully moved.", wp->GetWPId(), wp->GetName().c_str());
+
+        return true;
+    }
+
     static bool HandleNpcBotWPAddCommand(ChatHandler* handler, Optional<std::string> name,
         Optional<uint8> minlevel, Optional<uint8> maxlevel, Optional<uint32> flags)
     {
@@ -776,24 +1046,36 @@ public:
         player->GetZoneAndAreaId(zoneId, areaId);
         WanderNode* wp = new WanderNode(++WanderNode::nextWPId, player->GetMapId(), player->m_positionX, player->m_positionY, player->m_positionZ,
             player->GetOrientation(), zoneId, areaId, *name);
-        HandleWPSummon(wp);
-        ASSERT_NOTNULL(wp);
 
-        if (minlevel)
-            wp->SetLevels(*minlevel, maxlevel ? *maxlevel : uint8(DEFAULT_MAX_LEVEL));
+        wp->SetLevels((!minlevel && !maxlevel) ? GetZoneLevels(GetZoneIdOverride(zoneId)) : std::pair{minlevel ? *minlevel : uint8(1), maxlevel ? *maxlevel : uint8(DEFAULT_MAX_LEVEL)});
         if (flags)
             wp->SetFlags(BotWPFlags(*flags));
 
+        std::vector<uint32> linkIds;
+        WanderNode::DoForAllMapWPs(wp->GetMapId(), [wp = wp, &linkIds](WanderNode const* mwp) {
+            if (wp->GetWPId() != mwp->GetWPId() && wp->GetExactDist2d(mwp) < MAX_VISIBILITY_DISTANCE)
+                linkIds.push_back(mwp->GetWPId());
+        });
+        HandleWPUpdateLinks(handler, wp, linkIds);
+
+        ASSERT_NOTNULL(HandleWPSummon(wp));
+
+        uint32 wpId = wp->GetWPId();
+        std::string wpName = wp->GetName();
         auto [minl, maxl] = wp->GetLevels();
+        uint32 wpFlags = wp->GetFlags();
+
         std::ostringstream ss;
         ss << "INSERT INTO creature_template_npcbot_wander_nodes (id,mapid,x,y,z,o,zoneId,areaId,minlevel,maxlevel,flags,name,links)"
             << " VALUES "
-            << '(' << wp->GetWPId() << ',' << wp->GetMapId()
+            << '(' << wpId << ',' << wp->GetMapId()
             << ',' << wp->GetPositionX() << ',' << wp->GetPositionY() << ',' << wp->GetPositionZ() << ',' << wp->GetOrientation()
             << ',' << wp->GetZoneId() << ',' << wp->GetAreaId() << ',' << uint32(minl) << ',' << uint32(maxl)
-            << ',' << wp->GetFlags() << ",'" << wp->GetName() << "','" << wp->FormatLinks() << "')";
+            << ',' << wpFlags << ",'" << wpName << "','" << wp->FormatLinks() << "')";
 
         WorldDatabase.Execute(ss.str().c_str());
+
+        handler->PSendSysMessage("Created WP %u '%s' levels %u-%u flags %u", wpId, wpName.c_str(), uint32(minl), uint32(maxl), wpFlags);
 
         return true;
     }
@@ -811,6 +1093,7 @@ public:
         }
 
         uint32 wpId = wp->GetWPId();
+        std::string wpName = wp->GetName();
 
         HandleWPUpdateLinks(handler, wp, {});
         wpc->ToCreature()->AIM_Destroy();
@@ -820,7 +1103,7 @@ public:
 
         WorldDatabase.PExecute("DELETE FROM creature_template_npcbot_wander_nodes WHERE id=%u", wpId);
 
-        handler->PSendSysMessage("WP %u was successfully deleted.", wpId);
+        handler->PSendSysMessage("WP %u '%s' was successfully deleted.", wpId, wpName.c_str());
 
         return true;
     }
@@ -855,13 +1138,10 @@ public:
     }
     static bool HandleNpcBotWPListAllCommand(ChatHandler* handler)
     {
-        std::ostringstream ss;
-        ss << "ALL wps:";
-        WanderNode::DoForAllWPs([&ss](WanderNode* wp) {
-            ss << "\n" << wp->ToString();
+        WanderNode::DoForAllWPs([handler = handler](WanderNode* wp) {
+            handler->SendSysMessage(wp->ToString().c_str());
         });
 
-        handler->SendSysMessage(ss.str().c_str());
         return true;
     }
 

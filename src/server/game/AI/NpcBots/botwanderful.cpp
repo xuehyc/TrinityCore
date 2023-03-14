@@ -166,8 +166,6 @@ void WanderNode::RemoveWP(WanderNode* wp)
     if (wp->GetCreature() && wp->GetCreature()->IsInWorld())
         wp->GetCreature()->ToTempSummon()->DespawnOrUnsummon();
 
-    lock_type lock(*GetLock());
-
     ALL_WPS_PER_AREA.at(wp->_areaId).remove(wp);
     ALL_WPS_PER_ZONE.at(wp->_zoneId).remove(wp);
     ALL_WPS_PER_MAP.at(wp->_mapId).remove(wp);
@@ -179,6 +177,8 @@ void WanderNode::RemoveWP(WanderNode* wp)
 
 void WanderNode::RemoveAllWPs()
 {
+    lock_type lock(*GetLock());
+
     while (!ALL_WPS.empty())
         RemoveWP(ALL_WPS.front());
 }

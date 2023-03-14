@@ -17,6 +17,7 @@ class Creature;
 
 enum class BotWPFlags : uint32
 {
+    BOTWP_FLAG_NONE             = 0x00000000,
     BOTWP_FLAG_SPAWN            = 0x00000001,
     BOTWP_FLAG_ALLIANCE_ONLY    = 0x00000002,
     BOTWP_FLAG_HORDE_ONLY       = 0x00000004,
@@ -55,7 +56,7 @@ public:
     static void DoForContainerWPs(Container const& c, Func&& func) {
         static_assert(std::is_same_v<std::decay_t<std::remove_pointer_t<typename Container::value_type>>, WanderNode>);
         static_assert(std::is_convertible_v<Func, node_proc_ftype>);
-        lock_type lock(*GetLock());
+        //lock_type lock(*GetLock());
         for (auto* wp : c)
             func(wp);
     }
@@ -97,8 +98,11 @@ public:
         return _links;
     }
 
-    void SetLevels(uint8 minLevel, uint8 maxLevel) {
-        std::tie(_minLevel, _maxLevel) = { minLevel, maxLevel };
+    void SetLevels(std::pair<uint8, uint8> levels) {
+        std::tie(_minLevel, _maxLevel) = levels;
+    }
+    inline void SetLevels(uint8 minLevel, uint8 maxLevel) {
+        SetLevels(std::pair{ minLevel, maxLevel });
     }
 
     void SetFlags(BotWPFlags flags);

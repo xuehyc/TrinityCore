@@ -3933,6 +3933,7 @@ Appender.Console=1,3,0
 Appender.Server=2,2,0,Server.log,w
 Appender.GM=2,2,1,GM.log
 Appender.DBErrors=2,2,0,DBErrors.log
+Appender.NpcBots=1,2,0
 
 #  Logger config values: Given a logger "name"
 #    Logger.name
@@ -3959,6 +3960,7 @@ Logger.scripts.hotswap=3,Console Server
 Logger.sql.sql=5,Console DBErrors
 Logger.sql.updates=3,Console Server
 Logger.mmaps=3,Server
+Logger.npcbots=2,NpcBots Server
 
 #Logger.achievement=3,Console Server
 #Logger.addon=3,Console Server

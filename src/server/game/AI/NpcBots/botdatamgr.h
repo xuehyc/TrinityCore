@@ -157,6 +157,7 @@ class BotDataMgr
         static std::vector<uint32> GetExistingNPCBotIds();
         static uint8 GetOwnedBotsCount(ObjectGuid owner_guid, uint32 class_mask = 0);
 
+        static void LoadWanderMap(bool reload = false);
         static void GenerateWanderingBots();
         static CreatureTemplate const* GetBotExtraCreatureTemplate(uint32 entry);
         static EquipmentInfo const* GetBotEquipmentInfo(uint32 entry);
