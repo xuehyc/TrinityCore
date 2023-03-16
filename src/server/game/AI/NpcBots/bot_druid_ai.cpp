@@ -2529,8 +2529,7 @@ public:
 
         void SummonBotPet(Unit* target)
         {
-            //if (botPet)
-            //    UnsummonAll();
+            UnsummonTreants();
 
             uint32 entry = BOT_PET_FORCE_OF_NATURE;
 
@@ -2601,6 +2600,20 @@ public:
                 {
                     TC_LOG_ERROR("entities.unit", "Druid_bot:SummonedCreatureDespawn() treant is not found in array");
                     ASSERT(false);
+                }
+            }
+        }
+
+        void UnsummonTreants()
+        {
+            for (uint8 i = 0; i != MAX_TREANTS; ++i)
+            {
+                if (_treants[i])
+                {
+                    if (Unit* tr = ObjectAccessor::GetUnit(*me, _treants[i]))
+                        tr->ToTempSummon()->UnSummon();
+                    else
+                        _treants[i] = ObjectGuid::Empty;
                 }
             }
         }

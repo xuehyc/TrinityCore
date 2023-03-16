@@ -66,6 +66,7 @@ public:
     static void DoForAllZoneWPs(uint32 zoneId, node_proc_ftype_c&& func);
     static void DoForAllAreaWPs(uint32 areaId, node_proc_ftype_c&& func);
     static size_t GetAllWPsCount();
+    static size_t GetMapWPsCount(uint32 mapId);
     static size_t GetWPMapsCount();
 
     WanderNode(uint32 wpId, uint32 mapId, float x, float y, float z, float o, uint32 zoneId, uint32 areaId, std::string const& name);

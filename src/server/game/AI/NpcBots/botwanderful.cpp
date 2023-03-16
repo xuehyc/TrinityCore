@@ -129,6 +129,14 @@ size_t WanderNode::GetAllWPsCount()
     return ALL_WPS.size();
 }
 
+size_t WanderNode::GetMapWPsCount(uint32 mapId)
+{
+    lock_type lock(*GetLock());
+
+    node_mtype::const_iterator ci = ALL_WPS_PER_MAP.find(mapId);
+    return ci != ALL_WPS_PER_MAP.end() ? ci->second.size() : 0u;
+}
+
 size_t WanderNode::GetWPMapsCount()
 {
     lock_type lock(*GetLock());

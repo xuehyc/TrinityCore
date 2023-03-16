@@ -210,7 +210,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
             }
             if (sc_chain.back()->GetLinks().size() == 1u)
             {
-                TC_LOG_INFO("server.loading", "Node %u ('%s') has single connection!", tn->GetWPId(), tn->GetName().c_str());
+                TC_LOG_TRACE("server.loading", "Node %u ('%s') has single connection!", tn->GetWPId(), tn->GetName().c_str());
                 tops.emplace(sc_chain.front());
                 tops.emplace(sc_chain.back());
                 std::ostringstream ss;
@@ -635,7 +635,7 @@ void BotDataMgr::GenerateWanderingBots()
         for (WanderNode const* node : *bot_spawn_nodes)
         {
             auto [minlevel, maxlevel] = node->GetLevels();
-            if (myminlevel >= minlevel && myminlevel <= maxlevel)
+            if (minlevel >= myminlevel && myminlevel <= maxlevel)
                 level_nodes.push_back(node);
         }
 
@@ -1287,23 +1287,14 @@ std::pair<uint32, Position const*> BotDataMgr::GetNextWanderNode(uint32 mapId, u
         convec.reserve(node_cur->GetLinks().size());
         for (WanderNode const* link : node_cur->GetLinks())
         {
-            auto [minlevel, maxlevel] = link->GetLevels();
-            if (link->GetWPId() != lastNodeId && lvl + 3 >= minlevel && lvl <= maxlevel + 3)
+            if (link->GetWPId() != lastNodeId && lvl + 2 >= link->GetLevels().first && lvl <= link->GetLevels().second)
                 convec.push_back(link);
         }
         if (convec.empty())
         {
             for (WanderNode const* link : node_cur->GetLinks())
             {
-                if (link->GetWPId() != lastNodeId && lvl >= link->GetLevels().first)
-                    convec.push_back(link);
-            }
-        }
-        if (convec.empty())
-        {
-            for (WanderNode const* link : node_cur->GetLinks())
-            {
-                if (link->GetWPId() != lastNodeId && lvl >= link->GetLevels().first)
+                if (link->GetWPId() != lastNodeId && lvl + 6 >= link->GetLevels().first)
                     convec.push_back(link);
             }
         }

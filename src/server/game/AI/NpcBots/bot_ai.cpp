@@ -4299,9 +4299,9 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                     }
                     else
                     {
-                        if (me->GetLevel() + (unit->ToCreature()->isElite() ? 3 : 8) < unit->GetLevel())
+                        if (me->GetLevel() + (unit->ToCreature()->isElite() ? 3 : 6) < unit->GetLevel())
                             return true;
-                        if (unit->GetLevel() + (unit->ToCreature()->isElite() ? 8 : 6) < me->GetLevel())
+                        if (unit->GetLevel() + (unit->ToCreature()->isElite() ? 8 : 4) < me->GetLevel())
                             return true;
                         if (unit->IsCritter())
                             return true;
@@ -16936,8 +16936,7 @@ void bot_ai::Evade()
 
         if (!me->isMoving())
         {
-            bool farpoint = true;
-            if (dist > 45.0f)
+            if (dist > 17.5f)
             {
                 bool need_jump = false;
                 GetNextEvadeMovePoint(pos, need_jump);
@@ -16953,7 +16952,6 @@ void bot_ai::Evade()
                     BotJump(&pos, false);
                     _evadeCount = 0;
                     evadeDelayTimer = 2500;
-                    return;
                 }
                 else
                 {
@@ -16962,8 +16960,8 @@ void bot_ai::Evade()
 
                     movepos.Relocate(me);
                     BotMovement(BOT_MOVE_POINT, &pos);
-                    farpoint = false;
                 }
+                return;
             }
             else if (IsWanderer())
             {
@@ -16987,11 +16985,8 @@ void bot_ai::Evade()
                 return;
             }
 
-            if (farpoint)
-            {
-                movepos.Relocate(me);
-                BotMovement(BOT_MOVE_POINT, &pos);
-            }
+            movepos.Relocate(me);
+            BotMovement(BOT_MOVE_POINT, &pos);
         }
 
         return;
@@ -17007,16 +17002,54 @@ void bot_ai::Evade()
     me->SetFacingTo(pos.GetOrientation());
     me->SetFaction(me->GetCreatureTemplate()->faction);
 }
+void MovePositionEx(Position &pos, float dist, float angle, Unit const* u)
+{
+    angle += u->GetOrientation();
+    float destx, desty, destz, ground, floor;
+    destx = pos.m_positionX + dist * std::cos(angle);
+    desty = pos.m_positionY + dist * std::sin(angle);
+
+    ground = u->GetMapHeight(destx, desty, MAX_HEIGHT);
+    floor = u->GetMapHeight(destx, desty, pos.m_positionZ);
+    destz = std::fabs(ground - pos.m_positionZ) <= std::fabs(floor - pos.m_positionZ) ? ground : floor;
+
+    float step = dist/10.0f;
+
+    for (uint8 j = 0; j < 10; ++j)
+    {
+        // do not allow too big z changes
+        if (std::fabs(pos.m_positionZ - destz) > 15.0f)
+        {
+            destx -= step * std::cos(angle);
+            desty -= step * std::sin(angle);
+            ground = u->GetMapHeight(destx, desty, MAX_HEIGHT);
+            floor = u->GetMapHeight(destx, desty, pos.m_positionZ);
+            destz = std::fabs(ground - pos.m_positionZ) <= std::fabs(floor - pos.m_positionZ) ? ground : floor;
+        }
+        else
+        {
+            pos.Relocate(destx, desty, destz);
+            break;
+        }
+    }
+
+    Trinity::NormalizeMapCoord(pos.m_positionX);
+    Trinity::NormalizeMapCoord(pos.m_positionY);
+    u->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+    pos.SetOrientation(u->GetOrientation());
+
+}
 void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& need_jump) const
 {
-    static const float EVADE_MOVE_DIST = 20.0f;
+    static const float EVADE_MOVE_DIST = 80.0f;
     static const float EVADE_SEARCH_ANGLE = float(M_PI * 0.5);
     const uint8 evade_jump_threshold = me->HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING) ? 50 : 25;
-    float dist = frand(EVADE_MOVE_DIST * 1.15f, EVADE_MOVE_DIST * 1.35f);
-    float base_angle = me->GetRelativeAngle(pos);
+    const float midz = (me->m_positionZ + pos.m_positionZ) / 2.0f;
+    const float base_angle = me->GetRelativeAngle(pos);
+    float dist = std::min<float>(me->GetExactDist2d(pos),  frand(EVADE_MOVE_DIST * 1.15f, EVADE_MOVE_DIST * 1.35f));
     float ground, floor;
 
-    std::array angles{
+    const std::array angles{
         base_angle - frand(EVADE_SEARCH_ANGLE*0.55f, EVADE_SEARCH_ANGLE*0.75f),
         base_angle - frand(EVADE_SEARCH_ANGLE*0.25f, EVADE_SEARCH_ANGLE*0.45f),
         base_angle,
@@ -17025,11 +17058,11 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& need_jump) const
     };
     std::array<Position, angles.size()> positions{};
 
-    uint8 centerAngleIndex = uint8((angles.size() + 1) / 2 - 1);
+    const uint8 centerAngleIndex = uint8((angles.size() + 1) / 2 - 1);
     for (uint8 i = 0; i < angles.size(); ++i)
     {
         Position fixedpos(me->m_positionX, me->m_positionY, me->m_positionZ, angles[i]);
-        me->MovePosition(fixedpos, (i == centerAngleIndex) ? dist : dist * frand(0.25f, 0.75f), angles[i]);
+        MovePositionEx(fixedpos, (i == centerAngleIndex) ? dist : dist * frand(0.25f, 0.375f), angles[i], me);
         ground = me->GetMapHeight(fixedpos.m_positionX, fixedpos.m_positionY, MAX_HEIGHT, true, MAX_FALL_DISTANCE);
         floor = me->GetMapHeight(fixedpos.m_positionX, fixedpos.m_positionY, fixedpos.m_positionZ);
         fixedpos.m_positionZ = std::fabs(ground - me->m_positionZ) <= std::fabs(floor - me->m_positionZ) ? ground : floor;
@@ -17037,27 +17070,36 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& need_jump) const
     }
 
     Position my_pos(positions[centerAngleIndex]);
+    float minzdiff = std::fabs(my_pos.m_positionZ - midz);
     for (uint8 i = 0; i < angles.size() && i != centerAngleIndex; ++i)
     {
-        if (positions[i].m_positionZ > INVALID_HEIGHT && positions[i].m_positionZ < my_pos.m_positionZ - 4.0f)
+        if (positions[i].m_positionZ > INVALID_HEIGHT && (positions[i].m_positionZ - midz) < minzdiff &&
+            (me->GetExactDist2d(positions[i]) > me->GetExactDist2d(my_pos) + 10.0f ||
+            std::fabs((positions[i].m_positionZ - midz) - minzdiff) > 2.0f))
+        {
+            minzdiff = std::fabs(positions[i].m_positionZ - midz);
             my_pos.Relocate(positions[i]);
+        }
     }
 
     pos.Relocate(my_pos);
 
     if (!need_jump && _evadeCount >= evade_jump_threshold &&
-        (me->GetExactDist2d(pos) > EVADE_MOVE_DIST * 0.5f || std::fabs(me->m_positionZ - pos.m_positionZ) > EVADE_MOVE_DIST * 0.5f))
+        (me->GetExactDist2d(pos) < EVADE_MOVE_DIST * 0.25f && std::fabs(me->m_positionZ - pos.m_positionZ) > EVADE_MOVE_DIST * 0.15f))
         need_jump = true;
 
     if (!need_jump && std::fabs(pos.m_positionZ - me->m_positionZ) < 7.5f && me->GetExactDist2d(pos) < 5.0f && _evadeCount >= evade_jump_threshold)
     {
         pos.Relocate(me->m_positionX, me->m_positionY, me->m_positionZ);
-        pos.m_positionX += dist * std::cos(me->ToAbsoluteAngle(base_angle));
-        pos.m_positionY += dist * std::sin(me->ToAbsoluteAngle(base_angle));
+        pos.m_positionX += dist * 0.15f * std::cos(me->ToAbsoluteAngle(base_angle));
+        pos.m_positionY += dist * 0.15f * std::sin(me->ToAbsoluteAngle(base_angle));
 
         ground = me->GetMapHeight(pos.m_positionX, pos.m_positionY, MAX_HEIGHT, true, MAX_FALL_DISTANCE);
         floor = me->GetMapHeight(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
         pos.m_positionZ = std::fabs(ground - me->m_positionZ) <= std::fabs(floor - me->m_positionZ) ? ground : floor;
+        Trinity::NormalizeMapCoord(pos.m_positionX);
+        Trinity::NormalizeMapCoord(pos.m_positionY);
+        me->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
         need_jump = true;
     }
 

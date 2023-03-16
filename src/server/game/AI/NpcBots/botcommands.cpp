@@ -342,6 +342,8 @@ private:
             case 139: // Eastern Plaguelands
             case 618: // Winterspring
                 return { 53, 60 };
+            case 25: // BlackrockMountain
+                return { 46, 60 };
             default:
                 TC_LOG_ERROR("scripts", "GetZoneLevels: no choice for zoneId %u", zoneId);
                 return { 1, 60 };
