@@ -167,7 +167,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
                 continue;
             }
             float lwpdist2d = vt.second.first->GetExactDist2d(lwp);
-            if (lwpdist2d > MAX_VISIBILITY_DISTANCE)
+            if (lwpdist2d > MAX_VISIBILITY_DISTANCE * 1.5f)
                 TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is too great (%.2f)",
                     vt.first, lid, lwpdist2d);
             if (lwpdist2d < VISIBILITY_DISTANCE_NORMAL)
@@ -191,7 +191,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
     WanderNode::DoForAllWPs([&](WanderNode const* wp) {
         if (tops.count(wp) == 0u && wp->GetLinks().size() == 1u)
         {
-            TC_LOG_INFO("server.loading", "Node %u ('%s') has single connection!", wp->GetWPId(), wp->GetName().c_str());
+            TC_LOG_TRACE("server.loading", "Node %u ('%s') has single connection!", wp->GetWPId(), wp->GetName().c_str());
             WanderNode const* tn = wp->GetLinks().front();
             std::vector<WanderNode const*> sc_chain;
             sc_chain.push_back(wp);
@@ -199,8 +199,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
             {
                 if (tn->GetLinks().size() != 2u)
                 {
-                    if (tn->GetLinks().size() == 1u)
-                        sc_chain.push_back(tn);
+                    sc_chain.push_back(tn);
                     break;
                 }
                 uint32 prevId = sc_chain.back()->GetWPId();
@@ -209,7 +208,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
                     return lwp->GetWPId() == nId;
                 });
             }
-            if (sc_chain.size() > 1u)
+            if (sc_chain.back()->GetLinks().size() == 1u)
             {
                 TC_LOG_INFO("server.loading", "Node %u ('%s') has single connection!", tn->GetWPId(), tn->GetName().c_str());
                 tops.emplace(sc_chain.front());

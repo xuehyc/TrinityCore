@@ -3557,6 +3557,19 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell, bool secondary) cons
     if (IsPointedNoDPSTarget(target))
         return false;
 
+    if (IsWanderer())
+    {
+        switch (target->GetEntry())
+        {
+            case 33229: case 33243: case 33272: // AT Training dummy targets
+            case 4952: case 17578: case 24792: case 30527: case 31143: case 31144: case 31146: // training dummy
+            case 32541: case 32542: case 32543: case 32545: case 32546: case 32547: case 32666: case 32667: // training dummy
+                return false;
+            default:
+                break;
+        }
+    }
+
     uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() : master->GetBotMgr()->GetBotFollowDist();
     float foldist = _getAttackDistance(float(followdist));
     if (!IAmFree() && IsRanged() && me->IsWithinLOSInMap(target))
@@ -5466,22 +5479,18 @@ void bot_ai::_updateRations()
     if (!feast_mana && me->GetMaxPower(POWER_MANA) > 1 && !me->HasAuraType(SPELL_AURA_MOUNTED) && !me->isMoving() && CanDrink() &&
         !me->IsInCombat() && !me->GetVehicle() && !IsCasting() && GetManaPCT(me) < 75 && urand(0, 100) < 20)
     {
-        //me->SetStandState(UNIT_STAND_STATE_SIT);
-        CastSpellExtraArgs args(TRIGGERED_FULL_MASK);
-        me->CastSpell(me, GetRation(true), args);
         if (IAmFree())
             me->BotStopMovement();
+        me->CastSpell(me, GetRation(true), true);
     }
 
     //eat
     if (!feast_health && !me->HasAuraType(SPELL_AURA_MOUNTED) && !me->isMoving() && CanEat() &&
         !me->IsInCombat() && !me->GetVehicle() && !IsCasting() && GetHealthPCT(me) < 80 && urand(0, 100) < 20)
     {
-        //me->SetStandState(UNIT_STAND_STATE_SIT);
-        CastSpellExtraArgs args(TRIGGERED_FULL_MASK);
-        me->CastSpell(me, GetRation(false), args);
         if (IAmFree())
             me->BotStopMovement();
+        me->CastSpell(me, GetRation(false), true);
     }
 }
 //Health and Powers regeneration

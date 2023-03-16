@@ -205,7 +205,6 @@ std::string WanderNode::FormatLinks() const
     return lss.str();
 }
 
-
 void WanderNode::SetFlags(BotWPFlags flags)
 {
     _flags |= AsUnderlyingType(flags);

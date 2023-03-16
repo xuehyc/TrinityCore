@@ -109,6 +109,8 @@ public:
     void RemoveFlags(BotWPFlags flags);
     bool HasFlag(BotWPFlags flags) const;
 
+    void SetName(std::string const& name) { _name = name; }
+
     std::string ToString() const;
 
     uint32 GetWPId() const { return _wpId; }
@@ -124,7 +126,7 @@ private:
     const uint32 _mapId;
     const uint32 _zoneId;
     const uint32 _areaId;
-    const std::string _name;
+    /*const*/ std::string _name;
     uint8 _minLevel;
     uint8 _maxLevel;
     uint32 _flags;
