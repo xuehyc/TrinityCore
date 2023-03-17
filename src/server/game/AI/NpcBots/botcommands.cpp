@@ -1119,10 +1119,23 @@ public:
         wp->SetFlags(BotWPFlags(*flags));
 
         std::vector<uint32> linkIds;
-        WanderNode::DoForAllMapWPs(wp->GetMapId(), [wp = wp, &linkIds](WanderNode const* mwp) {
-            if (wp->GetWPId() != mwp->GetWPId() && wp->GetExactDist2d(mwp) < MAX_VISIBILITY_DISTANCE)
-                linkIds.push_back(mwp->GetWPId());
-        });
+        if (Unit* twpc = player->GetSelectedUnit())
+            if (WanderNode const* twp = WanderNode::FindInMapWPs(twpc->ToCreature(), player->GetMapId()))
+                if (twp->GetWPId() != wp->GetWPId() - 1)
+                    linkIds.push_back(twp->GetWPId());
+        if (linkIds.empty())
+        {
+            if (WanderNode const* pwp = WanderNode::FindInMapWPs(wp->GetWPId() - 1, player->GetMapId()))
+                if (wp->GetExactDist2d(pwp) < MAX_VISIBILITY_DISTANCE)
+                    linkIds.push_back(pwp->GetWPId());
+        }
+        if (linkIds.empty())
+        {
+            WanderNode::DoForAllMapWPs(wp->GetMapId(), [wp = wp, &linkIds](WanderNode const* mwp) {
+                if (wp->GetWPId() != mwp->GetWPId() && wp->GetExactDist2d(mwp) < MAX_VISIBILITY_DISTANCE)
+                    linkIds.push_back(mwp->GetWPId());
+            });
+        }
         HandleWPUpdateLinks(handler, wp, linkIds);
 
         ASSERT_NOTNULL(HandleWPSummon(wp));
