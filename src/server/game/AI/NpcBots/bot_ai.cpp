@@ -4277,7 +4277,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
 
     //check targets around
     float maxdist = InitAttackRange(float(followdist), ranged);
-    std::array<std::pair<Unit*, float>, 2> ts{};
+    std::array<std::pair<Unit*, float>, 2u> ts{};
     std::list<Unit*> unitList;
     NearestHostileUnitCheck check(me, maxdist, byspell, this);
     Trinity::UnitListSearcher searcher(master->ToUnit(), unitList, check);
@@ -11969,7 +11969,7 @@ void bot_ai::_generateGear()
                                     if (_spec == BOT_SPEC_PALADIN_RETRIBUTION)
                                         skip2 = true;
                                     break;
-                                case BOT_CLASS_ROGUE: case BOT_CLASS_DEATH_KNIGHT: case BOT_CLASS_DARK_RANGER: case BOT_CLASS_SEA_WITCH:
+                                case BOT_CLASS_ROGUE: case BOT_CLASS_HUNTER: case BOT_CLASS_DEATH_KNIGHT: case BOT_CLASS_DARK_RANGER: case BOT_CLASS_SEA_WITCH:
                                     if (proto->Class != ITEM_CLASS_WEAPON)
                                         skip2 = true;
                                     break;
