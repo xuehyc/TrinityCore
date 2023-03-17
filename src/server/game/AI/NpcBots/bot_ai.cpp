@@ -14658,6 +14658,36 @@ void bot_ai::JustEnteredCombat(Unit* u)
     AbortTeleport();
 
     ResetChase(u);
+
+    if (IAmFree() && !me->IsInCombat() && me->GetVictim() && me->GetVictim() != u &&
+        me->GetVictim()->GetVictim() != me && !(me->GetVictim()->IsInCombat() || me->GetVictim()->IsInCombatWith(me)))
+    {
+        bool byspell = false;
+        switch (_botclass)
+        {
+            case BOT_CLASS_DRUID:
+                byspell = GetBotStance() == BOT_STANCE_NONE || GetBotStance() == DRUID_MOONKIN_FORM;
+                break;
+            case BOT_CLASS_PRIEST:
+            case BOT_CLASS_MAGE:
+            case BOT_CLASS_WARLOCK:
+            case BOT_CLASS_SHAMAN:
+            case BOT_CLASS_SPHYNX:
+            case BOT_CLASS_ARCHMAGE:
+                byspell = true;
+                break;
+            default:
+                break;
+        }
+
+        if (CanBotAttack(u, byspell))
+        {
+            me->AttackStop();
+            me->BotStopMovement();
+            SetBotCommandState(BOT_COMMAND_COMBATRESET); //reset AttackStart()
+            me->Attack(u, !HasRole(BOT_ROLE_RANGED));
+        }
+    }
 }
 //killer may be NULL
 void bot_ai::JustDied(Unit* u)
