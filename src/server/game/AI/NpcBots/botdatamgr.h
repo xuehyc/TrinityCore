@@ -8,6 +8,7 @@
 #include <vector>
 
 class Creature;
+class WanderNode;
 
 struct EquipmentInfo;
 struct CreatureTemplate;
@@ -166,7 +167,8 @@ class BotDataMgr
         static uint8 GetMaxLevelForMapId(uint32 mapId);
         static uint8 GetMinLevelForBotClass(uint8 m_class);
         static TeamId GetTeamForFaction(uint32 factionTemplateId);
-        static std::pair<uint32, Position const*> GetNextWanderNode(uint32 mapId, uint32 curNodeId, uint32 lastNodeId, uint8 lvl, Position const* curpos);
+        static bool IsWanderNodeAvailableForBotFaction(WanderNode const* wp, uint32 factionTemplateId);
+        static std::pair<uint32, Position const*> GetNextWanderNode(uint32 mapId, uint32 curNodeId, uint32 lastNodeId, uint8 lvl, Creature const* bot);
         static Position GetWanderMapNodePosition(uint32 mapId, uint32 nodeId);
         static std::string GetWanderMapNodeName(uint32 mapId, uint32 nodeId);
         static std::pair<uint8, uint8> GetWanderMapNodeLevels(uint32 mapId, uint32 nodeId);

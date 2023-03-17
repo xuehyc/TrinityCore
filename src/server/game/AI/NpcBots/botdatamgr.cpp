@@ -37,6 +37,10 @@ NpcBotRegistry _existingBots;
 CreatureTemplateContainer _botsWanderCreatureTemplates;
 std::unordered_map<uint32, EquipmentInfo const*> _botsWanderCreatureEquipmentTemplates;
 
+constexpr uint32 FLAGS_ONLY_A = AsUnderlyingType(BotWPFlags::BOTWP_FLAG_ALLIANCE_ONLY);
+constexpr uint32 FLAGS_ONLY_H = AsUnderlyingType(BotWPFlags::BOTWP_FLAG_HORDE_ONLY);
+constexpr uint32 FLAGS_ONLY_A_OR_H = FLAGS_ONLY_A | FLAGS_ONLY_H;
+
 static bool allBotsLoaded = false;
 
 void BotDataMgr::LoadWanderMap(bool reload)
@@ -1241,21 +1245,34 @@ uint8 BotDataMgr::GetMinLevelForBotClass(uint8 m_class)
 
 TeamId BotDataMgr::GetTeamForFaction(uint32 factionTemplateId)
 {
-    FactionTemplateEntry const* fte = sFactionTemplateStore.LookupEntry(factionTemplateId);
-    if (!fte)
-        return TEAM_NEUTRAL;
-    else if (fte->FactionGroup & FACTION_MASK_ALLIANCE)
-        return TEAM_ALLIANCE;
-    else if (fte->FactionGroup & FACTION_MASK_HORDE)
-        return TEAM_HORDE;
-    else
-        return TEAM_NEUTRAL;
+    if (FactionTemplateEntry const* fte = sFactionTemplateStore.LookupEntry(factionTemplateId))
+    {
+        if (fte->FactionGroup & FACTION_MASK_ALLIANCE)
+            return TEAM_ALLIANCE;
+        else if (fte->FactionGroup & FACTION_MASK_HORDE)
+            return TEAM_HORDE;
+    }
+
+    return TEAM_NEUTRAL;
 }
 
-std::pair<uint32, Position const*> BotDataMgr::GetNextWanderNode(uint32 mapId, uint32 curNodeId, uint32 lastNodeId, uint8 lvl, Position const* curpos)
+bool BotDataMgr::IsWanderNodeAvailableForBotFaction(WanderNode const* wp, uint32 factionTemplateId)
 {
-    using NodeVec = std::vector<WanderNode const*>;
+    switch (GetTeamForFaction(factionTemplateId))
+    {
+        case TEAM_ALLIANCE:
+            return !(wp->GetFlags() & FLAGS_ONLY_H);
+        case TEAM_HORDE:
+            return !(wp->GetFlags() & FLAGS_ONLY_A);
+        case TEAM_NEUTRAL:
+            return !(wp->GetFlags() & FLAGS_ONLY_A_OR_H);
+        default:
+            return true;
+    }
+}
 
+std::pair<uint32, Position const*> BotDataMgr::GetNextWanderNode(uint32 mapId, uint32 curNodeId, uint32 lastNodeId, uint8 lvl, Creature const* bot)
+{
     WanderNode const* node_cur = WanderNode::FindInMapWPs(curNodeId, mapId);
 
     //Node got deleted! Select closest and go from there
@@ -1263,9 +1280,9 @@ std::pair<uint32, Position const*> BotDataMgr::GetNextWanderNode(uint32 mapId, u
     {
         float mindist = 50000.0f; // Anywhere
         WanderNode const* node_new = nullptr;
-        WanderNode::DoForAllMapWPs(mapId, [curpos = curpos, &mindist, &node_new](WanderNode const* wp) {
-            float dist = curpos->GetExactDist2d(wp);
-            if (dist < mindist)
+        WanderNode::DoForAllMapWPs(mapId, [bot = bot, &mindist, &node_new](WanderNode const* wp) {
+            float dist = bot->GetExactDist2d(wp);
+            if (IsWanderNodeAvailableForBotFaction(wp, bot->GetFaction()) && dist < mindist)
             {
                 mindist = dist;
                 node_new = wp;
@@ -1278,40 +1295,53 @@ std::pair<uint32, Position const*> BotDataMgr::GetNextWanderNode(uint32 mapId, u
         return { 0, nullptr };
     }
 
-    auto const& links = node_cur->GetLinks();
-    NodeVec convec;
-    if (links.size() == 1u)
-        convec.push_back(links.front());
-    else
+    auto linksCopy = node_cur->GetLinks();
+
+    if (linksCopy.size() > 1u)
     {
-        convec.reserve(node_cur->GetLinks().size());
-        for (WanderNode const* link : node_cur->GetLinks())
+        for (decltype(linksCopy)::const_iterator cit = linksCopy.cbegin(); cit != linksCopy.cend();)
         {
-            if (link->GetWPId() != lastNodeId && lvl + 2 >= link->GetLevels().first && lvl <= link->GetLevels().second)
-                convec.push_back(link);
+            if (IsWanderNodeAvailableForBotFaction(*cit, bot->GetFaction()) &&
+                ((*cit)->GetWPId() == lastNodeId || lvl + 6 >= (*cit)->GetLevels().first ||
+                lvl + 2 >= (*cit)->GetLevels().first && lvl <= (*cit)->GetLevels().second))
+                ++cit;
+            else
+                cit = linksCopy.erase(cit);
         }
-        if (convec.empty())
+        if (linksCopy.size() > 1u)
         {
-            for (WanderNode const* link : node_cur->GetLinks())
+            for (decltype(linksCopy)::const_iterator cit = linksCopy.cbegin(); cit != linksCopy.cend(); ++cit)
             {
-                if (link->GetWPId() != lastNodeId && lvl + 6 >= link->GetLevels().first)
-                    convec.push_back(link);
+                if ((*cit)->GetWPId() == lastNodeId)
+                {
+                    linksCopy.erase(cit);
+                    break;
+                }
             }
-        }
-        if (convec.empty())
-        {
-            for (WanderNode const* link : node_cur->GetLinks())
+            if (linksCopy.size() > 1u)
             {
-                if (link->GetWPId() != lastNodeId)
-                    convec.push_back(link);
+                decltype(linksCopy)::size_type normal_nodes_count = 0;
+                for (decltype(linksCopy)::const_iterator cit = linksCopy.cbegin(); cit != linksCopy.cend(); ++cit)
+                    if (lvl + 2 >= (*cit)->GetLevels().first && lvl <= (*cit)->GetLevels().second)
+                        ++normal_nodes_count;
+                if (normal_nodes_count > 0 && normal_nodes_count < linksCopy.size())
+                {
+                    for (decltype(linksCopy)::const_iterator cit = linksCopy.cbegin(); cit != linksCopy.cend();)
+                    {
+                        if (lvl + 2 >= (*cit)->GetLevels().first && lvl <= (*cit)->GetLevels().second)
+                            ++cit;
+                        else
+                            cit = linksCopy.erase(cit);
+                    }
+                }
             }
         }
     }
 
-    if (WanderNode const* wp = convec.empty() ? nullptr : convec.size() == 1u ? convec.front() : Trinity::Containers::SelectRandomContainerElement(convec))
-        return std::make_pair(wp->GetWPId(), static_cast<Position const*>(wp));
+    ASSERT(!linksCopy.empty());
+    WanderNode const* wp = linksCopy.size() == 1u ? linksCopy.front() : Trinity::Containers::SelectRandomContainerElement(linksCopy);
 
-    return { 0, nullptr };
+    return std::make_pair(wp->GetWPId(), static_cast<Position const*>(wp));
 }
 
 Position BotDataMgr::GetWanderMapNodePosition(uint32 mapId, uint32 nodeId)
