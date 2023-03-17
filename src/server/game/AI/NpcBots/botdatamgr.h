@@ -12,6 +12,7 @@ class WanderNode;
 
 struct EquipmentInfo;
 struct CreatureTemplate;
+struct FactionEntry;
 struct Position;
 
 enum LocaleConstant : uint8;
@@ -166,6 +167,7 @@ class BotDataMgr
         static uint8 GetLevelBonusForBotRank(uint32 rank);
         static uint8 GetMaxLevelForMapId(uint32 mapId);
         static uint8 GetMinLevelForBotClass(uint8 m_class);
+        static int32 GetBotBaseReputation(Creature const* bot, FactionEntry const* factionEntry);
         static TeamId GetTeamForFaction(uint32 factionTemplateId);
         static bool IsWanderNodeAvailableForBotFaction(WanderNode const* wp, uint32 factionTemplateId);
         static std::pair<uint32, Position const*> GetNextWanderNode(uint32 mapId, uint32 curNodeId, uint32 lastNodeId, uint8 lvl, Creature const* bot);

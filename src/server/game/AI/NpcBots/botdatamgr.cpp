@@ -3,6 +3,7 @@
 #include "botmgr.h"
 #include "botspell.h"
 #include "botwanderful.h"
+#include "bpet_ai.h"
 #include "Containers.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
@@ -1241,6 +1242,32 @@ uint8 BotDataMgr::GetMinLevelForBotClass(uint8 m_class)
         default:
             return 1;
     }
+}
+
+int32 BotDataMgr::GetBotBaseReputation(Creature const* bot, FactionEntry const* factionEntry)
+{
+    if (!factionEntry)
+        return 0;
+
+    if (bot->IsNPCBotPet())
+        bot = bot->GetBotPetAI()->GetPetsOwner();
+
+    uint32 raceMask = bot->GetFaction() == 14 ? 0 : bot->GetRaceMask();
+    uint32 classMask = bot->GetClassMask();
+
+    int32 minRep = 42999;
+    for (uint8 i = 0; i < 4; ++i)
+    {
+        if (raceMask == 0)
+            minRep = std::min<int32>(minRep, factionEntry->ReputationBase[i]);
+        if ((factionEntry->ReputationRaceMask[i] & raceMask || (factionEntry->ReputationRaceMask[i] == 0 && factionEntry->ReputationClassMask[i] != 0)) &&
+            (factionEntry->ReputationClassMask[i] & classMask || factionEntry->ReputationClassMask[i] == 0))
+        {
+            return factionEntry->ReputationBase[i];
+        }
+    }
+
+    return std::min<int32>(minRep, 0);
 }
 
 TeamId BotDataMgr::GetTeamForFaction(uint32 factionTemplateId)

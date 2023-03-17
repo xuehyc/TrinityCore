@@ -51,6 +51,10 @@
 #include "World.h"
 #include <G3D/Vector3.h>
 
+//npcbot
+#include "botdatamgr.h"
+//end npcbot
+
 constexpr float VisibilityDistances[AsUnderlyingType(VisibilityDistanceType::Max)] =
 {
     DEFAULT_VISIBILITY_DISTANCE,
@@ -2992,8 +2996,8 @@ bool WorldObject::IsValidAttackTarget(WorldObject const* target, SpellInfo const
         auto const* ft2 = sFactionTemplateStore.LookupEntry(unitTarget->GetFaction());
         auto const* fe1 = ft1 ? sFactionStore.LookupEntry(ft1->Faction) : nullptr;
         auto const* fe2 = ft2 ? sFactionStore.LookupEntry(ft2->Faction) : nullptr;
-        if ((IsNPCBotOrPet() && fe2 && fe2->CanHaveReputation() && ReputationMgr::ReputationToRank(fe2->ReputationBase[0]) >= REP_NEUTRAL) ||
-            (target->IsNPCBotOrPet() && fe1 && fe1->CanHaveReputation() && ReputationMgr::ReputationToRank(fe1->ReputationBase[0]) >= REP_NEUTRAL))
+        if ((IsNPCBotOrPet() && fe2 && fe2->CanHaveReputation() && ReputationMgr::ReputationToRank(BotDataMgr::GetBotBaseReputation(unit->ToCreature(), fe2)) >= REP_NEUTRAL) ||
+            (target->IsNPCBotOrPet() && fe1 && fe1->CanHaveReputation() && ReputationMgr::ReputationToRank(BotDataMgr::GetBotBaseReputation(unitTarget->ToCreature(), fe1)) >= REP_NEUTRAL))
             return false;
     }
     //end npcbot

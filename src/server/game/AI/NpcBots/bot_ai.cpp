@@ -3557,7 +3557,7 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell, bool secondary) cons
     if (IsPointedNoDPSTarget(target))
         return false;
 
-    if (IsWanderer())
+    if (IAmFree())
     {
         switch (target->GetEntry())
         {
@@ -3599,7 +3599,7 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell, bool secondary) cons
     }
 
     return
-        ((master->IsInCombat() || target->IsInCombat() || IsWanderer()) &&
+        ((master->IsInCombat() || target->IsInCombat() || IsWanderer() || (IAmFree() && me->GetFaction() == 14)) &&
         target->IsVisible() && target->isTargetableForAttack(false) && me->IsValidAttackTarget(target) &&
         (!master->IsAlive() || target->IsControlledByPlayer() ||
         (followdist > 0 && (master->GetDistance(target) <= foldist || HasBotCommandState(BOT_COMMAND_STAY)))) &&//if master is killed pursue to the end
