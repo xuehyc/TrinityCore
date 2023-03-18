@@ -16963,34 +16963,22 @@ void bot_ai::Evade()
     {
         _evadeMode = true;
 
-        if (!me->isMoving() && ((dist < 20.0f && zdiff > 30.0f) || me->GetExactDist2d(movepos) < 15.0f))
+        if (!me->isMoving() && ((dist < 20.0f && zdiff > 30.0f) || me->GetExactDist2d(movepos) < 25.0f))
             ++_evadeCount;
 
         if (!me->isMoving())
         {
             if (dist > 12.5f)
             {
-                bool need_jump = false;
-                GetNextEvadeMovePoint(pos, need_jump);
+                bool use_path = true;
+                GetNextEvadeMovePoint(pos, use_path);
                 ASSERT(pos.m_positionZ > INVALID_HEIGHT);
-                if (need_jump)
-                {
-                    //TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u Jumping to point dist2d %.2f, zdiff %.2f...",
-                    //    me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()),
-                    //    me->GetExactDist2d(pos), std::fabs(me->m_positionZ - pos.m_positionZ));
 
-                    BotJump(&pos, false);
+                if (IsWanderer() && _evadeCount && me->GetExactDist2d(movepos) > 25.0f)
                     _evadeCount = 0;
-                    evadeDelayTimer = 2500;
-                }
-                else
-                {
-                    if (IsWanderer() && _evadeCount && me->GetExactDist2d(movepos) > 15.0f)
-                        _evadeCount = 0;
 
-                    movepos.Relocate(me);
-                    BotMovement(BOT_MOVE_POINT, &pos);
-                }
+                movepos.Relocate(me);
+                BotMovement(BOT_MOVE_POINT, &pos, nullptr, use_path);
                 return;
             }
             else if (IsWanderer())
@@ -17012,7 +17000,7 @@ void bot_ai::Evade()
                 _travel_node_last = _travel_node_cur;
                 _travel_node_cur = nextNodeId;
                 _travelHistory.push_back(std::make_pair(nextNodeId, nodeName));
-                evadeDelayTimer = urand(11000, 15000);
+                evadeDelayTimer = urand(7000, 11000);
                 return;
             }
 
@@ -17069,36 +17057,48 @@ void MovePositionEx(Position& pos, float dist, float angle, Unit const* u)
     u->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     pos.SetOrientation(u->GetOrientation());
 }
-void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& need_jump) const
+void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
 {
-    static const float EVADE_MOVE_DIST = 80.0f;
-    static const float EVADE_SEARCH_ANGLE = float(M_PI * 0.5);
     const uint8 evade_jump_threshold = me->HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING) ? 50 : 25;
     const float base_angle = me->GetRelativeAngle(pos);
-    float dist = std::min<float>(me->GetExactDist2d(pos),  frand(EVADE_MOVE_DIST * 1.15f, EVADE_MOVE_DIST * 1.35f));
     float ground, floor;
 
     float fulldist = std::min<float>(me->GetExactDist2d(pos), float((MAX_POINT_PATH_LENGTH - 1) * SMOOTH_PATH_STEP_SIZE - 2.0f));
     PathGenerator path(me);
     while (path.GetPathType() == PATHFIND_BLANK ||
-        (path.GetPathType() & (PATHFIND_NOPATH | PATHFIND_SHORTCUT | PATHFIND_SHORT | PATHFIND_INCOMPLETE | PATHFIND_FARFROMPOLY_END)))
+        (path.GetPathType() & (PATHFIND_NOPATH | PATHFIND_SHORTCUT | PATHFIND_SHORT | PATHFIND_INCOMPLETE)))
     {
+        if (std::fabs(fulldist - me->GetExactDist2d(pos)) > 5.0f)
+        {
+            pos.Relocate(me->m_positionX, me->m_positionY, me->m_positionZ);
+            pos.m_positionX += fulldist * std::cos(me->ToAbsoluteAngle(base_angle));
+            pos.m_positionY += fulldist * std::sin(me->ToAbsoluteAngle(base_angle));
+
+            Trinity::NormalizeMapCoord(pos.m_positionX);
+            Trinity::NormalizeMapCoord(pos.m_positionY);
+            ground = me->GetMapHeight(pos.m_positionX, pos.m_positionY, MAX_HEIGHT, true, MAX_FALL_DISTANCE);
+            floor = me->GetMapHeight(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+            pos.m_positionZ = std::fabs(ground - pos.m_positionZ) <= std::fabs(floor - pos.m_positionZ) ? ground : floor;
+            if (pos.m_positionZ <= INVALID_HEIGHT)
+            {
+                me->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+                if (pos.m_positionZ <= INVALID_HEIGHT)
+                    pos.m_positionZ = me->GetPositionZ() + GROUND_HEIGHT_TOLERANCE;
+            }
+        }
+
         path.CalculatePath(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-        if (path.GetPathType() == PATHFIND_BLANK || path.GetPathType() & (PATHFIND_NORMAL | PATHFIND_FARFROMPOLY_START))
+        if (path.GetPathType() == PATHFIND_BLANK || (path.GetPathType() & (PATHFIND_NORMAL | PATHFIND_FARFROMPOLY_START)))
             break;
 
-        fulldist *= 0.70f;
-        if (fulldist < 30.0f)
+        fulldist *= 0.72f;
+
+        if (fulldist < 25.0f)
             break;
-
-        pos.Relocate(me->m_positionX, me->m_positionY, me->m_positionZ);
-        pos.m_positionX += fulldist * std::cos(me->ToAbsoluteAngle(base_angle));
-        pos.m_positionY += fulldist * std::sin(me->ToAbsoluteAngle(base_angle));
-
-        Trinity::NormalizeMapCoord(pos.m_positionX);
-        Trinity::NormalizeMapCoord(pos.m_positionY);
-        me->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     }
+
+    if (path.GetPathType() & (PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH))
+        return;
 
     switch (path.GetPathType())
     {
@@ -17113,87 +17113,48 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& need_jump) const
         case PATHFIND_FARFROMPOLY: // invalid coords
         case PATHFIND_FARFROMPOLY_START: //invalid start coords
         case PATHFIND_FARFROMPOLY_END: //invalid end coords
-            //log error and use direct point movement
-            TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u can't find full path to node %u, falling back to default PF!",
-                me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), _travel_node_cur);
-            break;
         default:
+            //log error and use direct point movement
+            TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u can't find full path to node %u (res %u) from pos %s, falling back to default PF!",
+                me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), _travel_node_cur, uint32(path.GetPathType()),
+                me->GetPosition().ToString().c_str());
             break;
     }
 
-    //below ground - jump to surface
-    if (!need_jump && !me->HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
+    use_path = false;
+
+    if (_evadeCount >= evade_jump_threshold)
     {
         Position mypos = me->GetPosition();
+        mypos.m_positionX += fulldist * std::cos(me->ToAbsoluteAngle(base_angle));
+        mypos.m_positionY += fulldist * std::sin(me->ToAbsoluteAngle(base_angle));
+        Trinity::NormalizeMapCoord(mypos.m_positionX);
+        Trinity::NormalizeMapCoord(pos.m_positionY);
+
+        ground = me->GetMapHeight(mypos.m_positionX, mypos.m_positionY, MAX_HEIGHT, true, MAX_FALL_DISTANCE);
+        floor = me->GetMapHeight(mypos.m_positionX, mypos.m_positionY, pos.m_positionZ);
+        mypos.m_positionZ = std::fabs(ground - mypos.m_positionZ) <= std::fabs(floor - mypos.m_positionZ) ? ground : floor;
+        if (mypos.m_positionZ <= INVALID_HEIGHT)
+            mypos.m_positionZ = me->GetPositionZ();
+        pos.Relocate(mypos);
+        return;
+    }
+
+    //below ground - move to surface
+    if (!me->HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
+    {
+        Position mypos = me->GetPosition();
+        mypos.m_positionX += fulldist * std::cos(me->ToAbsoluteAngle(base_angle)) * 0.15f;
+        mypos.m_positionY += fulldist * std::sin(me->ToAbsoluteAngle(base_angle)) * 0.15f;
+        Trinity::NormalizeMapCoord(mypos.m_positionX);
+        Trinity::NormalizeMapCoord(pos.m_positionY);
+
         ground = me->GetMapHeight(mypos.m_positionX, mypos.m_positionY, MAX_HEIGHT, true, MAX_FALL_DISTANCE);
         floor = me->GetMapHeight(mypos.m_positionX, mypos.m_positionY, mypos.m_positionZ);
-        if (me->m_positionZ < floor)
-        {
-            mypos.m_positionZ = std::fabs(ground - me->m_positionZ) <= std::fabs(floor - me->m_positionZ) ? ground : floor;
-            Trinity::NormalizeMapCoord(mypos.m_positionX);
-            Trinity::NormalizeMapCoord(mypos.m_positionY);
-            me->UpdateAllowedPositionZ(mypos.m_positionX, mypos.m_positionY, mypos.m_positionZ);
-            pos.Relocate(mypos);
-            need_jump = true;
-            return;
-        }
-    }
-
-    const float midz = (me->m_positionZ + pos.m_positionZ) / 2.0f;
-    const std::array angles{
-        base_angle - frand(EVADE_SEARCH_ANGLE*0.35f, EVADE_SEARCH_ANGLE*0.45f),
-        base_angle - frand(EVADE_SEARCH_ANGLE*0.15f, EVADE_SEARCH_ANGLE*0.25f),
-        base_angle,
-        base_angle + frand(EVADE_SEARCH_ANGLE*0.15f, EVADE_SEARCH_ANGLE*0.25f),
-        base_angle + frand(EVADE_SEARCH_ANGLE*0.35f, EVADE_SEARCH_ANGLE*0.45f)
-    };
-    std::array<Position, angles.size()> positions{};
-    const uint8 centerAngleIndex = uint8((angles.size() + 1) / 2 - 1);
-    for (uint8 i = 0; i < angles.size(); ++i)
-    {
-        Position fixedpos(me->m_positionX, me->m_positionY, me->m_positionZ, angles[i]);
-        MovePositionEx(fixedpos, (i == centerAngleIndex) ? dist : dist * frand(0.25f, 0.375f), angles[i], me);
-        ground = me->GetMapHeight(fixedpos.m_positionX, fixedpos.m_positionY, MAX_HEIGHT, true, MAX_FALL_DISTANCE);
-        floor = me->GetMapHeight(fixedpos.m_positionX, fixedpos.m_positionY, fixedpos.m_positionZ);
-        fixedpos.m_positionZ = std::fabs(ground - me->m_positionZ) <= std::fabs(floor - me->m_positionZ) ? ground : floor;
-        positions[i].Relocate(fixedpos);
-    }
-    Position my_pos(positions[centerAngleIndex]);
-    float minzdiff = std::fabs(my_pos.m_positionZ - midz);
-    for (uint8 i = 0; i < angles.size() && i != centerAngleIndex; ++i)
-    {
-        if (positions[i].m_positionZ > INVALID_HEIGHT && (positions[i].m_positionZ - midz) < minzdiff &&
-            (me->GetExactDist2d(positions[i]) > me->GetExactDist2d(my_pos) + 10.0f ||
-            std::fabs((positions[i].m_positionZ - midz) - minzdiff) > 2.0f))
-        {
-            minzdiff = std::fabs(positions[i].m_positionZ - midz);
-            my_pos.Relocate(positions[i]);
-        }
-    }
-    pos.Relocate(my_pos);
-
-    if (!need_jump && _evadeCount >= evade_jump_threshold)
-    {
-        if (me->GetExactDist2d(pos) < EVADE_MOVE_DIST * 0.25f && std::fabs(me->m_positionZ - pos.m_positionZ) > EVADE_MOVE_DIST * 0.15f)
-            need_jump = true;
-
-        else if (std::fabs(pos.m_positionZ - me->m_positionZ) < 7.5f && me->GetExactDist2d(pos) < 5.0f)
-        {
-            pos.Relocate(me->m_positionX, me->m_positionY, me->m_positionZ);
-            pos.m_positionX += dist * 0.15f * std::cos(me->ToAbsoluteAngle(base_angle));
-            pos.m_positionY += dist * 0.15f * std::sin(me->ToAbsoluteAngle(base_angle));
-
-            ground = me->GetMapHeight(pos.m_positionX, pos.m_positionY, MAX_HEIGHT, true, MAX_FALL_DISTANCE);
-            floor = me->GetMapHeight(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-            pos.m_positionZ = std::fabs(ground - me->m_positionZ) <= std::fabs(floor - me->m_positionZ) ? ground : floor;
-            Trinity::NormalizeMapCoord(pos.m_positionX);
-            Trinity::NormalizeMapCoord(pos.m_positionY);
-            me->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-            need_jump = true;
-        }
-
-        if (pos.m_positionZ <= INVALID_HEIGHT)
-            pos.m_positionZ = me->m_positionZ;
+        mypos.m_positionZ = std::fabs(ground - mypos.m_positionZ) <= std::fabs(floor - mypos.m_positionZ) ? ground : floor;
+        if (mypos.m_positionZ <= INVALID_HEIGHT)
+            mypos.m_positionZ = me->GetPositionZ();
+        pos.Relocate(mypos);
     }
 }
 //TeleportHome() ONLY CALLED THROUGH EVENTPROCESSOR

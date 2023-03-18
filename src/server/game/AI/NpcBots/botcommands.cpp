@@ -382,6 +382,8 @@ private:
                 return 139; // EPL
             case 2100: // Maraudon
                 return 405; // Desolace
+            case 1581: // Deadmines
+                return 40; // Westfall
             default:
                 return zoneId;
         }

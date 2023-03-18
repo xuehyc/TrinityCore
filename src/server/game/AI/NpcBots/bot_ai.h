@@ -92,7 +92,7 @@ class bot_ai : public CreatureAI
         Creature* GetBotsPet() const { return botPet; }
 
         void Evade();
-        void GetNextEvadeMovePoint(Position& pos, bool& need_jump) const;
+        void GetNextEvadeMovePoint(Position& pos, bool& use_path) const;
 
         EventProcessor* GetEvents() { return &Events; }
         ObjectGuid::LowType GetBotOwnerGuid() const { return _ownerGuid; }
