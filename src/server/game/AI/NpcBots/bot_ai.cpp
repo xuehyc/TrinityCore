@@ -10305,7 +10305,7 @@ void bot_ai::CheckRacials(uint32 diff)
             {
                 if (Spell const* spell = victim->GetCurrentSpell(CURRENT_GENERIC_SPELL))
                 {
-                    if (IsInBotParty(spell->m_targets.GetUnitTarget()) && spell->GetTimer() < 1000)
+                    if (IsInBotParty(spell->m_targets.GetUnitTargetGUID()) && spell->GetTimer() < 1000)
                         if (doCast(me, arcaneTorrent))
                             return;
                 }
