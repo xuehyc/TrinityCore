@@ -1238,6 +1238,13 @@ enum TrinityStrings
     LANG_SHUTDOWN_CANCELLED                       = 11018,
     LANG_YOU_CHANGE_POWER                         = 11019,
     LANG_YOUR_POWER_CHANGED                       = 11020,
-    LANG_INVALID_POWER_NAME                       = 11021
+    LANG_INVALID_POWER_NAME                       = 11021,
+    LANG_RANDOM_MESSAGE                           = 65002, // %s
+    LANG_WP_MOVE_1                                = 65003, // WP MOVE DONE 1 WALK
+    LANG_WP_MOVE_2                                = 65004, // WP MOVE DONE 2 RUN
+    LANG_WP_MOVE_3                                = 65005, // WP MOVE DONE 3 FLYING
+    LANG_WP_DELAY                                 = 65006, // WP DELAY DONE
+	
+	Roleplay_CMDE_MANUAL_SELECT_CREATURE          = 100145,
 };
 #endif

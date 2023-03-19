@@ -63,6 +63,17 @@ void VisibleNotifier::SendToSelf()
             }
         }
     }
+	
+	if (Map* map = i_player.GetMap())
+    {
+        for (const ObjectGuid& obj : map->GetInfiniteGameObjects()) {
+            if (vis_guids.find(obj) != vis_guids.end())
+                vis_guids.erase(obj);
+
+            if (GameObject* gob = i_player.GetMap()->GetGameObject(obj))
+                i_player.UpdateVisibilityOf(gob, i_data, i_visibleNow);
+        }
+    }
 
     for (auto it = vis_guids.begin(); it != vis_guids.end(); ++it)
     {

@@ -363,7 +363,7 @@ void PetAI::HandleReturnMovement()
 
     // Prevent activating movement when under control of spells
     // such as "Eyes of the Beast"
-    if (me->IsCharmed())
+    if (me->IsCharmed() || me->HasUnitState(UNIT_STATE_CHARGING))
         return;
 
     if (!me->GetCharmInfo())
@@ -372,7 +372,7 @@ void PetAI::HandleReturnMovement()
         return;
     }
 
-    if (me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
+    if (me->GetCharmInfo()->HasCommandState(COMMAND_STAY) || me->GetCharmInfo()->HasCommandState(COMMAND_MOVE_TO))
     {
         if (!me->GetCharmInfo()->IsAtStay() && !me->GetCharmInfo()->IsReturning())
         {
@@ -458,6 +458,7 @@ void PetAI::MovementInform(uint32 type, uint32 id)
             {
                 ClearCharmInfoFlags();
                 me->GetCharmInfo()->SetIsAtStay(true);
+				me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MoveIdle();
             }
             break;

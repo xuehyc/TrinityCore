@@ -92,6 +92,7 @@ LogsDir = ""
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
 #    HotfixDatabaseInfo
+#    RoleplayDatabaseInfo
 #        Description: Database connection settings for the world server.
 #        Example:     "hostname;port;username;password;database;ssl"
 #                     ".;some_number;username;password;database" - (Use named pipes on Windows
@@ -103,6 +104,7 @@ LogsDir = ""
 #                     "127.0.0.1;3306;trinity;trinity;world"      - (WorldDatabaseInfo)
 #                     "127.0.0.1;3306;trinity;trinity;characters" - (CharacterDatabaseInfo)
 #                     "127.0.0.1;3306;trinity;trinity;hotfixes"   - (HotfixDatabaseInfo)
+#                     "127.0.0.1;3306;trinity;trinity;roleplay"   - (RoleplayDatabaseInfo)
 #
 #    Don't change hostname unless you are hosting MySQL on a different machine, if you need help
 #    with configuration allowing to connect from different machine than the one running server
@@ -116,12 +118,14 @@ LoginDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;auth"
 WorldDatabaseInfo     = "127.0.0.1;3306;trinity;trinity;world"
 CharacterDatabaseInfo = "127.0.0.1;3306;trinity;trinity;characters"
 HotfixDatabaseInfo    = "127.0.0.1;3306;trinity;trinity;hotfixes"
+RoleplayDatabaseInfo   = "127.0.0.1;3306;trinity;trinity;roleplay"
 
 #
 #    LoginDatabase.WorkerThreads
 #    WorldDatabase.WorkerThreads
 #    CharacterDatabase.WorkerThreads
 #    HotfixDatabase.WorkerThreads
+#    RoleplayDatabase.WorkerThreads
 #        Description: The amount of worker threads spawned to handle asynchronous (delayed) MySQL
 #                     statements. Each worker thread is mirrored with its own connection to the
 #                     MySQL server and their own thread on the MySQL server.
@@ -134,22 +138,26 @@ LoginDatabase.WorkerThreads     = 1
 WorldDatabase.WorkerThreads     = 1
 CharacterDatabase.WorkerThreads = 1
 HotfixDatabase.WorkerThreads    = 1
+RoleplayDatabase.WorkerThreads  = 1
 
 #
 #    LoginDatabase.SynchThreads
 #    WorldDatabase.SynchThreads
 #    CharacterDatabase.SynchThreads
 #    HotfixDatabase.SynchThreads
+#    RoleplayDatabase.SynchThreads
 #        Description: The amount of MySQL connections spawned to handle.
 #        Default:     1 - (LoginDatabase.SynchThreads)
 #                     1 - (WorldDatabase.SynchThreads)
 #                     2 - (CharacterDatabase.SynchThreads)
 #                     1 - (HotfixDatabase.SynchThreads)
+#                     1 - (RoleplayDatabase.SynchThreads)
 
 LoginDatabase.SynchThreads     = 1
 WorldDatabase.SynchThreads     = 1
 CharacterDatabase.SynchThreads = 2
 HotfixDatabase.SynchThreads    = 1
+RoleplayDatabase.SynchThreads  = 1
 
 #
 #    MaxPingTime
@@ -974,6 +982,13 @@ RecruitAFriend.MaxDifference = 4
 
 DisableWaterBreath = 4
 
+#    Enable or Disable "Fatigue" timer
+#           default = 1 (enabled)
+#                   = 0 (disabled)
+
+fatigue.enabled = 0
+
+#
 #
 #    AllFlightPaths
 #        Description: Character knows all flight paths (of both factions) after creation.
@@ -1454,6 +1469,7 @@ TOTPMasterSecret =
 #           DATABASE_CHARACTER = 2, // Character database
 #           DATABASE_WORLD     = 4, // World database
 #           DATABASE_HOTFIX    = 8, // Hotfixes database
+#           DATABASE_ROLEPLAY  = 16, // Roleplay database (don't use)
 #
 #        Default:     15 - (All enabled)
 #                     4  - (Enable world only)
@@ -4383,3 +4399,86 @@ Pvp.FactionBalance.Pct20 = 0.8
 
 #
 ###################################################################################################
+
+###################################################################################################
+# ELUNA SETTINGS
+#
+# These settings control if Eluna is enabled
+#
+#    Eluna.Enabled
+#        Description: If Eluna is enabled on the server
+#        Default:     True
+
+Eluna.Enabled = 1
+
+#
+# These settings control the Eluna scripts path
+#
+#    Eluna.ScriptPath
+#        Description: Eluna script Path
+#        Default:     lua_scripts
+
+Eluna.ScriptPath = "lua_scripts"
+
+#
+# These settings control the Eluna traceback
+#
+#    Eluna.ScriptPath
+#        Description: Eluna Trace back
+#        Default:     0
+
+Eluna.TraceBack = 0
+
+#
+###################################################################################################
+
+#
+#    Roleplay.CustomNpc.OutfitIdStart
+#    Roleplay.CustomNpc.CreatureTemplateIdStart
+#        Description: Controls the id from which dressnpc outfits & custom npc creature_template entries will be added.
+#        Default:     OutfitIdStart = 200001
+#                     CreatureTemplateIdStart = 400000
+
+Roleplay.CustomNpc.OutfitIdStart = 200001
+Roleplay.CustomNpc.CreatureTemplateIdStart = 400000
+
+#####################################################################################################
+# TimeIsTime Module (If you use this module, you will not be able to keep track of real time. All events and times on the calendar will run differently)
+
+# Enable TimeIsTime
+# Settings: 0 = off, 1 = on
+# Default:  1
+
+TimeIsTime.Enable = 1
+
+# SpeedRate
+# Adjust the number of game days per real day by altering the Realm Timer
+# Settings: 60 is 1 second (Real Time) = 1 minute (Realm Timer)
+#           
+#           60.0  = 1 Game Day every 24   minutes
+#           30.0  = 1 Game Day every 48   minutes         
+#           15.0  = 1 Game Day every 96   minutes or 1.6  Hours
+#           7.5   = 1 Game Day every 192  minutes or 3.2  Hours
+#           3.75  = 1 Game Day every 384  minutes or 6.4  Hours        
+#           1.875 = 1 Game Day every 768  minutes or 12.8 Hours
+#           1.0   = 1 Game Day every 1440 minutes or 24.0 Hours (Realtime)
+# Default:  1.0 (Blizzlike)
+
+TimeIsTime.SpeedRate = 20.0
+
+# Start (client side) game clock at chosen Epoch (Unix) time at the same time each login
+# Default:  0  (Local Time)
+# Example:  https://i-leon.ru/tools/time 
+#           TimeIsTime.TimeStart = unix time
+#           TimeIsTime.HourOffset = your UTC
+#           Date on example   	  	 :: 06-01-2021
+#			Sunrise  	= 06:00:00   :: 1622516400
+#           Midday  	= 12:00:00   :: 1622538000
+#           Sunset	 	= 18:00:00   :: 1622559600
+#           Midnight	= 00:00:00   :: 1622581200
+
+TimeIsTime.TimeStart = 0
+TimeIsTime.HourOffset = 0.0
+
+#
+#####################################################################################################

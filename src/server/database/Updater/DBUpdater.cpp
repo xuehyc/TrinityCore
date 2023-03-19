@@ -123,6 +123,31 @@ BaseLocation DBUpdater<WorldDatabaseConnection>::GetBaseLocationType()
     return LOCATION_DOWNLOAD;
 }
 
+// Roleplay Database
+template<>
+std::string DBUpdater<RoleplayDatabaseConnection>::GetConfigEntry()
+{
+    return "Updates.Roleplay";
+}
+
+template<>
+std::string DBUpdater<RoleplayDatabaseConnection>::GetTableName()
+{
+    return "Roleplay";
+}
+template<>
+std::string DBUpdater<RoleplayDatabaseConnection>::GetBaseFile()
+{
+    return BuiltInConfig::GetSourceDirectory() + "/sql/base/Roleplay_database.sql";
+}
+
+template<>
+bool DBUpdater<RoleplayDatabaseConnection>::IsEnabled(uint32 const updateMask)
+{
+    // This way silences warnings under msvc
+    return (updateMask & DatabaseLoader::DATABASE_Roleplay) ? true : false;
+}
+
 // Character Database
 template<>
 std::string DBUpdater<CharacterDatabaseConnection>::GetConfigEntry()
@@ -443,3 +468,4 @@ template class TC_DATABASE_API DBUpdater<LoginDatabaseConnection>;
 template class TC_DATABASE_API DBUpdater<WorldDatabaseConnection>;
 template class TC_DATABASE_API DBUpdater<CharacterDatabaseConnection>;
 template class TC_DATABASE_API DBUpdater<HotfixDatabaseConnection>;
+template class TC_DATABASE_API DBUpdater<RoleplayDatabaseConnection>;

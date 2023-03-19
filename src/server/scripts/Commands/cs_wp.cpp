@@ -57,6 +57,9 @@ public:
             { "unload", rbac::RBAC_PERM_COMMAND_WP_UNLOAD, false, &HandleWpUnLoadCommand, "" },
             { "reload", rbac::RBAC_PERM_COMMAND_WP_RELOAD, false, &HandleWpReloadCommand, "" },
             { "show",   rbac::RBAC_PERM_COMMAND_WP_SHOW,   false, &HandleWpShowCommand,   "" },
+			{ "move",   rbac::RBAC_PERM_COMMAND_WP_ADD,    false, &HandleWpMoveCommand,   "" },
+            { "delay",  rbac::RBAC_PERM_COMMAND_WP_ADD,    false, &HandleWpDelayCommand,  "" },
+            { "lookup", rbac::RBAC_PERM_COMMAND_WP_ADD,    false, &HandleWpLookupCommand, "" },
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1091,6 +1094,170 @@ public:
         }
 
         handler->PSendSysMessage("|cffff33ffDEBUG: wpshow - no valid command found|r");
+        return true;
+    }
+	
+	static bool HandleWpMoveCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+        // Space
+
+        char const* px = strtok((char*)args, " "); // WP id
+        char const* py = strtok(NULL, " "); // pathID
+        char const* pz = strtok(NULL, " "); // moveType
+
+        if (!px || !py || !pz)
+            return false;
+
+        uint64 wpId = uint64(atoi(px));
+        uint32 pathId = uint32(atoi(py));
+        uint8 moveType = uint8(atoi(pz));
+
+
+        Creature* target = handler->getSelectedCreature();
+
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_SELECT_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+
+        //SQL
+        QueryResult guidSql = WorldDatabase.PQuery("SELECT move_type FROM waypoint_data WHERE id = %u", wpId);
+        if (!guidSql)
+        {
+            WorldDatabasePreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_INS_WP_MOVETYPE);
+            stmt->setUInt64(0, wpId); // id
+            stmt->setUInt64(1, pathId); // PathID
+            stmt->setUInt8(2, moveType); // move_type
+            WorldDatabase.Execute(stmt);
+            sWaypointMgr->ReloadPath(wpId); // RELOAD
+        }
+        else
+        {
+            // dans le cas ou le joueur souhaite d?finir un autre type de marche 
+            WorldDatabasePreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_WP_MOVETYPE);
+            stmt->setUInt8(0, moveType); // move_type
+            stmt->setUInt64(1, wpId); // id
+            stmt->setUInt64(2, pathId); // PathID
+            WorldDatabase.Execute(stmt);
+            sWaypointMgr->ReloadPath(wpId); // RELOAD
+        }
+
+        switch (moveType)
+        {
+        case 0:
+            handler->SendSysMessage(LANG_WP_MOVE_1);
+            break;
+        case 1:
+            handler->SendSysMessage(LANG_WP_MOVE_2);
+            break;
+        case 2:
+            handler->SendSysMessage(LANG_WP_MOVE_3);
+            break;
+
+            {
+
+            }
+        }
+
+        return true;
+    }
+
+    static bool HandleWpDelayCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+        // Space
+
+        char const* px = strtok((char*)args, " "); // WP id
+        char const* py = strtok(NULL, " "); // pathID
+        char const* pz = strtok(NULL, " "); // delay
+
+        if (!px || !py || !pz)
+            return false;
+
+        uint64 wpId = uint64(atoi(px));
+        uint32 pathId = uint32(atoi(py));
+        uint32 delay = uint32(atoi(pz));
+
+        Creature* target = handler->getSelectedCreature();
+
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_SELECT_CREATURE);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        //SQL
+        QueryResult guidSql = WorldDatabase.PQuery("SELECT delay FROM waypoint_data WHERE id = %u", wpId);
+        if (!guidSql)
+        {
+            WorldDatabasePreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_INS_WP_DELAY);
+            stmt->setUInt64(0, wpId); // id
+            stmt->setUInt64(1, pathId); // PathID
+            stmt->setUInt32(2, delay * 1000); // delay + *1000 for miliseconds
+            WorldDatabase.Execute(stmt);
+            sWaypointMgr->ReloadPath(wpId); // RELOAD
+        }
+        else
+        {
+            // dans le cas ou le joueur souhaite changer le delay
+            WorldDatabasePreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_WP_DELAY);
+            stmt->setUInt32(0, delay * 1000); //  delay * 1000 for miliseconds
+            stmt->setUInt64(1, wpId); // id
+            stmt->setUInt64(2, pathId); // PathID
+            WorldDatabase.Execute(stmt);
+            sWaypointMgr->ReloadPath(wpId); // RELOAD
+        }
+
+        handler->PSendSysMessage(LANG_WP_DELAY, delay);
+
+        return true;
+    }
+
+    static bool HandleWpLookupCommand(ChatHandler* handler, char const* /* args */)
+    {
+        Creature* target = handler->getSelectedCreature();
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_SELECT_CREATURE);
+            return false;
+        }
+        uint32 pathId = target->GetWaypointPath();
+        if (!pathId)
+        {
+            handler->PSendSysMessage(LANG_RANDOM_MESSAGE, "pathId");
+            return false;
+        }
+        WorldDatabasePreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_WAYPOINT_LOOKUP); // SELECT * FROM waypoint_data WHERE id = %u", pathId);
+        stmt->setUInt32(0, pathId);
+        PreparedQueryResult result = WorldDatabase.Query(stmt);
+        if (!result)
+        {
+            handler->PSendSysMessage(LANG_RANDOM_MESSAGE, "SQL");
+            return false;
+        }
+        char msg[255];
+        snprintf(msg, 255, "---- Waypoint id = %u ----", pathId);
+        handler->PSendSysMessage(LANG_RANDOM_MESSAGE, msg);
+        do
+        {
+            Field* field = result->Fetch();
+            uint32 nbPath = field[1].GetUInt32();
+            float x = field[2].GetFloat();
+            float y = field[3].GetFloat();
+            float z = field[4].GetFloat();
+            snprintf(msg, 255, "Path %u : x = %f y = %f z = %f", nbPath, x, y, z);
+            handler->PSendSysMessage(LANG_RANDOM_MESSAGE, msg);
+
+        } while (result->NextRow());
+        handler->PSendSysMessage(LANG_RANDOM_MESSAGE, "-------------------------");
+
         return true;
     }
 };

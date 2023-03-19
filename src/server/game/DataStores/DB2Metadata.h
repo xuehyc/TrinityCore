@@ -3120,7 +3120,7 @@ struct CreatureDisplayInfoOptionMeta
     {
         { FT_INT, 1, true },
         { FT_INT, 1, true },
-        { FT_INT, 1, true },
+        { FT_INT, 1, false },
     };
 
     static constexpr DB2Meta Instance{ 3692043, -1, 3, 2, 0xDBD77820, Fields, 2 };
@@ -7989,11 +7989,12 @@ struct MythicPlusSeasonTrackedMapMeta
 
 struct NPCModelItemSlotDisplayInfoMeta
 {
-    static constexpr DB2MetaField Fields[3] =
+    static constexpr DB2MetaField Fields[4] =
     {
         { FT_INT, 1, true },
         { FT_BYTE, 1, true },
         { FT_INT, 1, true },
+		{ FT_INT, 1, true },
     };
 
     static constexpr DB2Meta Instance{ 1340661, -1, 3, 2, 0x6345189C, Fields, 2 };
@@ -10261,7 +10262,7 @@ struct SoundKitEntryMeta
         { FT_INT, 1, false },
         { FT_INT, 1, true },
         { FT_BYTE, 1, false },
-        { FT_FLOAT, 1, true },
+        { FT_FLOAT, 1, false },
     };
 
     static constexpr DB2Meta Instance{ 1237435, -1, 4, 4, 0x962B1DCC, Fields, 0 };
@@ -11014,7 +11015,7 @@ struct SpellLabelMeta
     static constexpr DB2MetaField Fields[2] =
     {
         { FT_INT, 1, false },
-        { FT_INT, 1, true },
+        { FT_INT, 1, false },
     };
 
     static constexpr DB2Meta Instance{ 1347275, -1, 2, 1, 0x8FB85089, Fields, 1 };

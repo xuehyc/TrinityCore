@@ -862,10 +862,11 @@ namespace WorldPackets
             bool Enable = false;
         };
 
-        class OverrideLight final : public ServerPacket
+        class TC_GAME_API OverrideLight final : public ServerPacket
         {
         public:
             OverrideLight() : ServerPacket(SMSG_OVERRIDE_LIGHT, 4 + 4 + 4) { }
+			OverrideLight(int32 areaLightID, int32 milli, int32 overLightID) : ServerPacket(SMSG_OVERRIDE_LIGHT, 4 + 4 + 4), AreaLightID(areaLightID), TransitionMilliseconds(milli), OverrideLightID(overLightID) { }
 
             WorldPacket const* Write() override;
 
@@ -986,6 +987,29 @@ namespace WorldPackets
             int32 LootSpec = 0;
             ::Gender Gender = GENDER_NONE;
             uint32 CurrencyID = 0;
+        };
+		
+		class RuneforgeLegendaryCraftingOpenNpc  final : public ServerPacket
+        {
+        public:
+            RuneforgeLegendaryCraftingOpenNpc() : ServerPacket(SMSG_RUNEFORGE_LEGENDARY_CRAFTING_OPEN_NPC, 16) {}
+
+            WorldPacket const* Write() override;
+
+            ObjectGuid ObjGUID;
+            bool IsUpgrade;
+        };
+
+        class UIItemInteractionOpenNpc  final : public ServerPacket
+        {
+        public:
+            UIItemInteractionOpenNpc() : ServerPacket(SMSG_UI_ITEM_INTERACTION_NPC, 23) {}
+
+            WorldPacket const* Write() override;
+
+            ObjectGuid ObjectGUID;
+            int32 UiUnk1 = 0;
+            int32 UiUnk2 = 0;
         };
     }
 }

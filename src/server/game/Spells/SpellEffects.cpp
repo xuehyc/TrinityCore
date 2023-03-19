@@ -62,6 +62,9 @@
 #include "PhasingHandler.h"
 #include "Player.h"
 #include "ReputationMgr.h"
+#ifdef ELUNA
+#include "LuaEngine.h"
+#endif
 #include "RestMgr.h"
 #include "SceneObject.h"
 #include "ScriptMgr.h"
@@ -561,6 +564,15 @@ void Spell::EffectDummy()
     // normal DB scripted effect
     TC_LOG_DEBUG("spells", "Spell ScriptStart spellid {} in EffectDummy({})", m_spellInfo->Id, effectInfo->EffectIndex);
     m_caster->GetMap()->ScriptsStart(sSpellScripts, uint32(m_spellInfo->Id | (effectInfo->EffectIndex << 24)), m_caster, unitTarget);
+	
+#ifdef ELUNA
+    if (gameObjTarget)
+        sEluna->OnDummyEffect(m_caster, m_spellInfo->Id, effectInfo->EffectIndex, gameObjTarget);
+    else if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
+        sEluna->OnDummyEffect(m_caster, m_spellInfo->Id, effectInfo->EffectIndex, unitTarget->ToCreature());
+    else if (itemTarget)
+        sEluna->OnDummyEffect(m_caster, m_spellInfo->Id, effectInfo->EffectIndex, itemTarget);
+#endif
 }
 
 void Spell::EffectTriggerSpell()
@@ -1575,6 +1587,10 @@ void Spell::EffectOpenLock()
         // these objects must have been spawned by outdoorpvp!
         else if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_GOOBER && sOutdoorPvPMgr->HandleOpenGo(player, gameObjTarget))
             return;
+		else if (player && gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_CHEST)
+            if (PlayerConditionEntry const* playerCondition = sPlayerConditionStore.LookupEntry(goInfo->chest.conditionID1))
+                if (!sConditionMgr->IsPlayerMeetingCondition(player, playerCondition))
+                    return;
         lockId = goInfo->GetLockId();
         guid = gameObjTarget->GetGUID();
     }
@@ -1599,6 +1615,9 @@ void Spell::EffectOpenLock()
         SendCastResult(res);
         return;
     }
+	
+	if (reqSkillValue == 0)
+        reqSkillValue = skillValue;
 
     if (gameObjTarget)
         gameObjTarget->Use(player);
@@ -3721,8 +3740,25 @@ void Spell::EffectSkinning()
     loot->FillLoot(creature->GetCreatureTemplate()->SkinLootId, LootTemplates_Skinning, player, true);
     player->SendLoot(*loot);
 
+    // This formula is still used
     if (skill == SKILL_SKINNING)
     {
+        //int32 reqValue;
+        //if (targetLevel <= 10)
+        //    reqValue = 1; // 1-60
+        //else if (targetLevel < 16)
+        //    reqValue = (targetLevel - 10) * 10; // 60-110
+        //else if (targetLevel <= 23)
+        //    reqValue = targetLevel * 4.8; // 110 - 185
+        //else if (targetLevel < 39)
+        //    reqValue = targetLevel * 10 - 205; // 185-225
+        //else if (targetLevel <= 44)
+        //    reqValue = targetLevel * 5 + 5; // 225-260
+        //else if (targetLevel <= 52)
+        //    reqValue = targetLevel * 5; // 260-300
+        //else
+        //    reqValue = 300;
+
         int32 reqValue;
         if (targetLevel <= 10)
             reqValue = 1;
@@ -3752,9 +3788,19 @@ void Spell::EffectSkinning()
         // TODO: Specialize skillid for each expansion
         // new db field?
         // tied to one of existing expansion fields in creature_template?
+        ContentTuningEntry const* contentTuning = sContentTuningStore.LookupEntry(creature->GetContentTuning());
+        if (!contentTuning)
+            return;
 
-        // Double chances for elites
-        m_caster->ToPlayer()->UpdateGatherSkill(skill, damage, reqValue, creature->isElite() ? 2 : 1);
+        uint32 skinningSkill = player->GetProfessionSkillForExp(skill, contentTuning->ExpansionID);
+        if (!skinningSkill)
+            return;
+
+        if (uint32 pureSkillValue = player->GetPureSkillValue(skinningSkill))
+        {
+            // Double chances for elites
+            player->UpdateGatherSkill(skinningSkill, pureSkillValue, reqValue, creature->isElite() ? 2 : 1);
+        }
     }
 }
 
@@ -3870,9 +3916,9 @@ void Spell::EffectKnockBack()
         unitTarget->InterruptNonMeleeSpells(true);
 
     float ratio = 0.1f;
-    float speedxy = float(effectInfo->MiscValue) * ratio;
-    float speedz = float(damage) * ratio;
-    if (speedxy < 0.01f && speedz < 0.01f)
+    float speedXY = float(effectInfo->MiscValue) * ratio;
+    float speedZ = float(damage) * ratio;
+    if (std::abs(speedXY) < 0.01f && std::abs(speedZ) < 0.01f)
         return;
 
     Position origin;
@@ -3886,7 +3932,7 @@ void Spell::EffectKnockBack()
     else //if (effectInfo->Effect == SPELL_EFFECT_KNOCK_BACK)
         origin = m_caster->GetPosition();
 
-    unitTarget->KnockbackFrom(origin, speedxy, speedz);
+    unitTarget->KnockbackFrom(origin, speedXY, speedZ);
 
     Unit::ProcSkillsAndAuras(GetUnitCasterForEffectHandlers(), unitTarget, PROC_FLAG_NONE, { PROC_FLAG_NONE, PROC_FLAG_2_KNOCKBACK },
         PROC_SPELL_TYPE_MASK_ALL, PROC_SPELL_PHASE_HIT, PROC_HIT_NONE, nullptr, nullptr, nullptr);

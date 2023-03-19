@@ -782,3 +782,21 @@ WorldPacket const* WorldPackets::Misc::DisplayToast::Write()
 
     return &_worldPacket;
 }
+
+WorldPacket const* WorldPackets::Misc::RuneforgeLegendaryCraftingOpenNpc::Write()
+{
+    _worldPacket << ObjGUID;
+    _worldPacket.WriteBit(IsUpgrade);
+
+    return &_worldPacket;
+}
+
+WorldPacket const* WorldPackets::Misc::UIItemInteractionOpenNpc::Write()
+{
+    _worldPacket << ObjectGUID;
+    _worldPacket << int32(UiUnk1);
+    _worldPacket << int32(UiUnk2);
+
+    return &_worldPacket;
+}
+

@@ -27,6 +27,9 @@
 #include "MapObject.h"
 #include <list>
 
+class CreatureOutfit;
+#include <memory>
+
 class CreatureAI;
 class CreatureGroup;
 class Quest;
@@ -79,6 +82,12 @@ class TC_GAME_API Creature : public Unit, public GridObject<Creature>, public Ma
         void SetObjectScale(float scale) override;
         void SetDisplayId(uint32 displayId, float displayScale = 1.f) override;
         void SetDisplayFromModel(uint32 modelIdx);
+		uint32 GetDisplayId() const final;
+        void SetDisplayIdRaw(uint32 modelId, float displayScale = 1.f);
+
+        std::shared_ptr<CreatureOutfit>& GetOutfit() { return m_outfit; };
+        void SetOutfit(std::shared_ptr<CreatureOutfit> const& outfit);
+        void SetMirrorImageFlag(bool on) { if (on) SetUnitFlag2(UNIT_FLAG2_MIRROR_IMAGE); else RemoveUnitFlag2(UNIT_FLAG2_MIRROR_IMAGE); };
 
         void DisappearAndDie() { ForcedDespawn(0); }
 
@@ -245,6 +254,8 @@ class TC_GAME_API Creature : public Unit, public GridObject<Creature>, public Ma
         GuidUnorderedSet const& GetTapList() const { return m_tapList; }
         void SetTapList(GuidUnorderedSet tapList) { m_tapList = std::move(tapList); }
         bool hasLootRecipient() const { return !m_tapList.empty(); }
+        bool IsTapListNotClearedOnEvade() const { return m_dontClearTapListOnEvade; }
+        void SetDontClearTapListOnEvade(bool dontClear);
         bool isTappedBy(Player const* player) const;                          // return true if the creature is tapped by the player or a member of his party.
         Loot* GetLootForPlayer(Player const* player) const override;
         bool IsFullyLooted() const;
@@ -400,6 +411,7 @@ class TC_GAME_API Creature : public Unit, public GridObject<Creature>, public Ma
         std::string GetDebugInfo() const override;
 
         void ExitVehicle(Position const* exitPosition = nullptr) override;
+		void SetGuid(ObjectGuid const& guid);
 
         bool HasFlag(CreatureStaticFlags flag) const { return _staticFlags.HasFlag(flag); }
         bool HasFlag(CreatureStaticFlags2 flag) const { return _staticFlags.HasFlag(flag); }
@@ -426,6 +438,7 @@ class TC_GAME_API Creature : public Unit, public GridObject<Creature>, public Ma
         static float _GetHealthMod(int32 Rank);
 
         GuidUnorderedSet m_tapList;
+        bool m_dontClearTapListOnEvade;
 
         /// Timers
         time_t _pickpocketLootRestore;
@@ -493,6 +506,8 @@ class TC_GAME_API Creature : public Unit, public GridObject<Creature>, public Ma
             ObjectGuid Target;        // the creature's "real" target while casting
             float Orientation = 0.0f; // the creature's "real" orientation while casting
         } _spellFocusInfo;
+		
+		std::shared_ptr<CreatureOutfit> m_outfit;
 
         time_t _lastDamagedTime; // Part of Evade mechanics
         CreatureTextRepeatGroup m_textRepeat;

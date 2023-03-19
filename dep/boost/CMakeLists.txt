@@ -8,6 +8,11 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+# Set CMP0074 to 'NEW' to use '<PackageName>_ROOT' variables.
+if (POLICY CMP0074)
+    cmake_policy(SET CMP0074 NEW)
+endif()
+
 if(WIN32)
   set(BOOST_DEBUG ON)
   if(DEFINED ENV{BOOST_ROOT})

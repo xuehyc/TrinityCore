@@ -40,6 +40,7 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include "Vehicle.h"
+#include "MiscPackets.h"
 
 /*########
 # npc_air_force_bots
@@ -2288,6 +2289,63 @@ private:
     TaskScheduler _scheduler;
 };
 
+struct npc_runecarver_180509 : public ScriptedAI
+{
+    npc_runecarver_180509(Creature* creature) : ScriptedAI(creature) { }
+
+    void HandleRuneforgeLegendaryCraftingOpenNpc(Player* player, bool isUpgrade)
+    {
+        WorldPackets::Misc::RuneforgeLegendaryCraftingOpenNpc packet;
+        packet.ObjGUID = me->GetGUID();
+        packet.IsUpgrade = isUpgrade;
+        player->GetSession()->SendPacket(packet.Write());
+    }
+
+    void HandleUIItemInteractionOpenNpc(Player* player)
+    {
+        WorldPackets::Misc::UIItemInteractionOpenNpc  packet;
+        packet.ObjectGUID = me->GetGUID();
+        packet.UiUnk1 = 4;
+        packet.UiUnk2 = 4;
+        player->GetSession()->SendPacket(packet.Write());
+    }
+
+    bool OnGossipHello(Player* player) override
+    {
+        if (me->IsQuestGiver())
+            player->PrepareQuestMenu(me->GetGUID());
+
+        AddGossipItemFor(player, Player::GetDefaultGossipMenuForSource(me), 2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        AddGossipItemFor(player, Player::GetDefaultGossipMenuForSource(me), 3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        AddGossipItemFor(player, Player::GetDefaultGossipMenuForSource(me), 4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+
+        SendGossipMenuFor(player, player->GetGossipTextId(me), me->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
+    {
+        uint32 const action = GetGossipActionFor(player, gossipListId);
+
+        ClearGossipMenuFor(player);
+        CloseGossipMenuFor(player);
+
+        switch (action)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
+            HandleRuneforgeLegendaryCraftingOpenNpc(player, false);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 2:
+            HandleRuneforgeLegendaryCraftingOpenNpc(player, true);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 3:
+            HandleUIItemInteractionOpenNpc(player);
+            break;
+        }
+        return true;
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -2311,4 +2369,5 @@ void AddSC_npcs_special()
     new npc_argent_squire_gruntling();
     new npc_bountiful_table();
     RegisterCreatureAI(npc_gen_void_zone);
+	RegisterCreatureAI(npc_runecarver_180509);
 }

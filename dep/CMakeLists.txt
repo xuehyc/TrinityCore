@@ -39,6 +39,10 @@ if(TOOLS)
   add_subdirectory(CascLib)
 endif()
 
+if (ELUNA)
+  add_subdirectory(lualib)
+endif()
+
 if(BUILD_TESTING)
   include(FetchContent)
   FetchContent_Declare(Catch2
