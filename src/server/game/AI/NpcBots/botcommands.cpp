@@ -3319,7 +3319,7 @@ public:
 
         Player const* owner = handler->GetSession()->GetPlayer();
 
-        if (!owner->HaveBot())
+        if (!owner->HaveBot() && BotDataMgr::GetOwnedBotsCount(owner->GetGUID()) == 0)
             return return_syntax(handler);
 
         BotMgr* mgr = owner->GetBotMgr();
