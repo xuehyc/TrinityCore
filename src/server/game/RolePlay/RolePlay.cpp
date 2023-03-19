@@ -711,6 +711,12 @@ void Roleplay::CreateCustomNpcFromPlayer(Player* player, std::string const& key)
     std::shared_ptr<CreatureOutfit> co(new CreatureOutfit());
 
     uint32 outfitId = sConfigMgr->GetInt64Default("Roleplay.CustomNpc.OutfitIdStart", 200001) + sObjectMgr->_creatureOutfitStore.size();
+    if (!sObjectMgr->_creatureOutfitStore.empty()) {
+        using pairtype = std::pair<uint32, std::shared_ptr<CreatureOutfit>>;
+        outfitId = std::max_element(sObjectMgr->_creatureOutfitStore.begin(), sObjectMgr->_creatureOutfitStore.end(),
+            [](pairtype a, pairtype b) { return a.second->id < b.second->id; })->second->id + 1;
+    }
+
     co->id = outfitId;
     co->npcsoundsid = 0;
     co->race = player->GetRace();
@@ -759,6 +765,7 @@ void Roleplay::CreateCustomNpcFromPlayer(Player* player, std::string const& key)
     sObjectMgr->_creatureOutfitStore[outfitId] = std::move(co);
 
     CreatureTemplate creatureTemplate;
+
     uint32 npcCreatureTemplateId = sConfigMgr->GetInt64Default("Freedom.CustomNpc.CreatureTemplateIdStart", 400000);
     if (!_customNpcStore.empty()) {
         using pairtype = std::pair<std::string, CustomNpcData>;
@@ -1116,7 +1123,7 @@ void Roleplay::SaveNpcOutfitToDb(uint32 templateId, uint8 variationId)
     stmt->setUInt64(index++, co->guild);
     trans->Append(stmt);
 
-    // "REPLACE INTO creature_template_model (CreatureId, Idx, CreatureDisplayId, DisplayScale, Probability) VALUES (?, ?, ?, 1, 1)"
+    // "REPLACE INTO creature_template_model (CreatureId, Idx, CreatureDisplayId, DisplayScale, Probability) VALUES (?, ?, ?, ?, 1)"
     stmt = WorldDatabase.GetPreparedStatement(WORLD_REP_CREATURE_TEMPLATE_MODEL);
     stmt->setUInt32(0, templateId);
     stmt->setUInt8(1, variationId - 1);

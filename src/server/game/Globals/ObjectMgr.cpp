@@ -9348,7 +9348,8 @@ void ObjectMgr::LoadCreatureOutfits()
         _creatureOutfitStore[co->id] = std::move(co);
 
         ++count;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     TC_LOG_INFO("server.loading", ">> Loaded %u creature outfits in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
