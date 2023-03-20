@@ -3545,6 +3545,10 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell, bool secondary) cons
         return false;
     if (HasBotCommandState(BOT_COMMAND_FULLSTOP))
         return false;
+    if (target->HasUnitState(UNIT_STATE_EVADE | UNIT_STATE_IN_FLIGHT))
+        return false;
+    if (target->IsCombatDisallowed())
+        return false;
     if (target->CanHaveThreatList() && GetEngageTimer() > lastdiff)
         return false;
     if (!BotMgr::IsPvPEnabled() && !IAmFree() && target->IsControlledByPlayer())
@@ -17103,7 +17107,7 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
 
     // No path: proceed to destination in small steps, maybe it's just a fluke... Move to surface if needed
     Position mypos = me->GetPosition();
-    float movedist = std::max<float>(fulldist * 0.15f, 15.0f);
+    float movedist = std::min<float>(fulldist * 0.25f, 15.0f);
     mypos.m_positionX += movedist * std::cos(me->ToAbsoluteAngle(base_angle));
     mypos.m_positionY += movedist * std::sin(me->ToAbsoluteAngle(base_angle));
     Trinity::NormalizeMapCoord(mypos.m_positionX);
