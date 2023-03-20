@@ -35,6 +35,7 @@
 #include "Opcodes.h"
 
 //npcbot
+#include "botdatamgr.h"
 #include "botmgr.h"
 //end npcbot
 
@@ -219,6 +220,10 @@ void MapManager::Update(uint32 diff)
     i_timer.Update(diff);
     if (!i_timer.Passed())
         return;
+
+    //npcbot
+    BotDataMgr::Update(diff);
+    //end npcbot
 
     MapMapType::iterator iter = i_maps.begin();
     for (; iter != i_maps.end(); ++iter)

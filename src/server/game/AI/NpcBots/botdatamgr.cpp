@@ -37,12 +37,73 @@ NpcBotRegistry _existingBots;
 
 CreatureTemplateContainer _botsWanderCreatureTemplates;
 std::unordered_map<uint32, EquipmentInfo const*> _botsWanderCreatureEquipmentTemplates;
+std::list<std::pair<uint32, WanderNode const*>> _botsWanderCreaturesToSpawn;
 
 constexpr uint32 FLAGS_ONLY_A = AsUnderlyingType(BotWPFlags::BOTWP_FLAG_ALLIANCE_ONLY);
 constexpr uint32 FLAGS_ONLY_H = AsUnderlyingType(BotWPFlags::BOTWP_FLAG_HORDE_ONLY);
 constexpr uint32 FLAGS_ONLY_A_OR_H = FLAGS_ONLY_A | FLAGS_ONLY_H;
 
 static bool allBotsLoaded = false;
+
+static uint32 next_wandering_bot_spawn_delay = 0;
+
+void BotDataMgr::Update(uint32 diff)
+{
+    if (_botsWanderCreaturesToSpawn.empty())
+        return;
+
+    static const uint32 WANDERING_BOT_SPAWN_DELAY = 500;
+
+    if (next_wandering_bot_spawn_delay >= diff)
+    {
+        next_wandering_bot_spawn_delay -= diff;
+        return;
+    }
+    else
+        next_wandering_bot_spawn_delay += WANDERING_BOT_SPAWN_DELAY;
+
+    auto const& p = _botsWanderCreaturesToSpawn.front();
+
+    uint32 bot_id = p.first;
+    WanderNode const* spawnLoc = p.second;
+
+    _botsWanderCreaturesToSpawn.pop_front();
+
+    CreatureTemplate const& bot_template = _botsWanderCreatureTemplates.at(bot_id);
+    NpcBotData const* bot_data = SelectNpcBotData(bot_id);
+    NpcBotExtras const* bot_extras = SelectNpcBotExtras(bot_id);
+    Position spawnPos = spawnLoc->GetPosition();
+
+    ASSERT(bot_data);
+    ASSERT(bot_extras);
+
+    CellCoord c = Trinity::ComputeCellCoord(spawnLoc->m_positionX, spawnLoc->m_positionY);
+    GridCoord g = Trinity::ComputeGridCoord(spawnLoc->m_positionX, spawnLoc->m_positionY);
+
+    Map* map = sMapMgr->CreateBaseMap(spawnLoc->GetMapId());
+    map->LoadGrid(spawnLoc->m_positionX, spawnLoc->m_positionY);
+
+    TC_LOG_INFO("npcbots", "Spawning wandering bot: %s (%u) class %u race %u fac %u, location: mapId %u %s (%s)",
+        bot_template.Name.c_str(), bot_id, uint32(bot_extras->bclass), uint32(bot_extras->race), bot_data->faction,
+        spawnLoc->GetMapId(), spawnLoc->ToString().c_str(), spawnLoc->GetName().c_str());
+
+    Creature* bot = new Creature();
+    if (!bot->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, PHASEMASK_NORMAL, bot_id, *spawnLoc))
+    {
+        delete bot;
+        TC_LOG_FATAL("server.loading", "Creature is not created!");
+        ASSERT(false);
+    }
+    if (!bot->LoadBotCreatureFromDB(0, map, true, true, bot_id, &spawnPos))
+    {
+        delete bot;
+        TC_LOG_FATAL("server.loading", "Cannot load npcbot from DB!");
+        ASSERT(false);
+    }
+
+    bot->GetBotAI()->SetTravelNodeCur(spawnLoc->GetWPId());
+    bot->GetBotAI()->SetShouldUpdateStats();
+}
 
 void BotDataMgr::LoadWanderMap(bool reload)
 {
@@ -518,6 +579,9 @@ void BotDataMgr::GenerateWanderingBots()
         {BOT_CLASS_SEA_WITCH, 14u}
     };
 
+    /// @TODO: manage allowed world maps HERE: 0, 1 530, 571
+    const std::array wbot_allowed_maps{ 0u };
+
     const uint32 wandering_bots_desired = BotMgr::GetDesiredWanderingBotsCount();
 
     if (wandering_bots_desired == 0)
@@ -594,23 +658,31 @@ void BotDataMgr::GenerateWanderingBots()
     for (NodeVec* vec : { &spawns_a, &spawns_h, &spawns_rest })
         vec->reserve(WanderNode::GetWPMapsCount() * 20u);
 
-    /// @TODO: manage allowed world maps HERE: 0, 1 530, 571
-    WanderNode::DoForAllWPs([&spawns_a, &spawns_h, &spawns_rest](WanderNode const* wp) {
-        uint32 flags = wp->GetFlags();
-        if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_SPAWN))
+    WanderNode::DoForAllWPs([&spawns_a, &spawns_h, &spawns_rest, &wbot_allowed_maps](WanderNode const* wp) {
+        if (std::find(std::cbegin(wbot_allowed_maps), std::cend(wbot_allowed_maps), wp->GetMapId()) != std::cend(wbot_allowed_maps))
         {
-            if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_ALLIANCE_ONLY))
-                spawns_a.push_back(wp);
-            else if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_HORDE_ONLY))
-                spawns_h.push_back(wp);
-            else
+            uint32 flags = wp->GetFlags();
+            if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_SPAWN))
             {
-                spawns_a.push_back(wp);
-                spawns_h.push_back(wp);
-                spawns_rest.push_back(wp);
+                if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_ALLIANCE_ONLY))
+                    spawns_a.push_back(wp);
+                else if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_HORDE_ONLY))
+                    spawns_h.push_back(wp);
+                else
+                {
+                    spawns_a.push_back(wp);
+                    spawns_h.push_back(wp);
+                    spawns_rest.push_back(wp);
+                }
             }
         }
     });
+
+    if (spawns_a.empty() || spawns_h.empty() || spawns_rest.empty())
+    {
+        TC_LOG_FATAL("server.loading", "Not all factions (a/h/m) have spawn points, make sure at least one exists for each! Aborting!");
+        ASSERT(false);
+    }
 
     std::set<uint32> botgrids;
     for (uint32 i = 1; i <= wandering_bots_desired; ++i) // i is a counter, NOT used as index or value
@@ -693,31 +765,10 @@ void BotDataMgr::GenerateWanderingBots()
         GridCoord g = Trinity::ComputeGridCoord(spawnLoc->m_positionX, spawnLoc->m_positionY);
         ASSERT(c.IsCoordValid(), "Invalid Cell coord!");
         ASSERT(g.IsCoordValid(), "Invalid Grid coord!");
-        Map* map = sMapMgr->CreateBaseMap(spawnLoc->GetMapId());
-        map->LoadGrid(spawnLoc->m_positionX, spawnLoc->m_positionY);
+        Map const* map = sMapMgr->CreateBaseMap(spawnLoc->GetMapId());
         ASSERT(!map->Instanceable(), map->GetDebugInfo().c_str());
 
-        TC_LOG_INFO("npcbots", "Spawning wandering bot: %s (%u) class %u race %u fac %u, location: mapId %u %s (%s)",
-            bot_template.Name.c_str(), bot_id, uint32(bot_extras->bclass), uint32(bot_extras->race), bot_data->faction,
-            spawnLoc->GetMapId(), spawnLoc->ToString().c_str(), spawnLoc->GetName().c_str());
-        Position spos;
-        spos.Relocate(spawnLoc->m_positionX, spawnLoc->m_positionY, spawnLoc->m_positionZ, spawnLoc->GetOrientation());
-        Creature* bot = new Creature();
-        if (!bot->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, PHASEMASK_NORMAL, bot_id, spos))
-        {
-            delete bot;
-            TC_LOG_FATAL("server.loading", "Creature is not created!");
-            ASSERT(false);
-        }
-        if (!bot->LoadBotCreatureFromDB(0, map, true, true, bot_id, &spos))
-        {
-            delete bot;
-            TC_LOG_FATAL("server.loading", "Cannot load npcbot from DB!");
-            ASSERT(false);
-        }
-
-        bot->GetBotAI()->SetTravelNodeCur(spawnLoc->GetWPId());
-        bot->GetBotAI()->SetShouldUpdateStats();
+        _botsWanderCreaturesToSpawn.push_back({ bot_id, spawnLoc });
 
         remove_bot_orig_entry_from_available(bot_class, orig_template->Entry);
 
@@ -726,7 +777,7 @@ void BotDataMgr::GenerateWanderingBots()
 
     CharacterDatabase.PExecute("UPDATE worldstates SET value = %u WHERE entry = %u", bot_id, uint32(BOT_GIVER_ENTRY));
 
-    TC_LOG_INFO("server.loading", ">> Spawned %u wandering bots in %u grids in %u ms",
+    TC_LOG_INFO("server.loading", ">> Set up spawning of %u wandering bots in %u grids in %u ms",
         uint32(_botsWanderCreatureTemplates.size()), uint32(botgrids.size()), GetMSTimeDiffToNow(oldMSTime));
 }
 

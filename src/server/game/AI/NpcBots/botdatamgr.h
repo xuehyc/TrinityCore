@@ -131,6 +131,8 @@ typedef std::set<Creature const*> NpcBotRegistry;
 class BotDataMgr
 {
     public:
+        static void Update(uint32 diff);
+
         static void LoadNpcBots(bool spawn = true);
         static void LoadNpcBotGroupData();
 
