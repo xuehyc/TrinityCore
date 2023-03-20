@@ -2246,7 +2246,7 @@ void bot_ai::SetStats(bool force)
             uint8 mapmaxlevel = BotDataMgr::GetMaxLevelForMapId(me->GetMap()->GetEntry()->ID);
             mapmaxlevel += BotDataMgr::GetLevelBonusForBotRank(me->GetCreatureTemplate()->rank);
             //TODO: experience system for levelups
-            mylevel = std::max<uint8>(mylevel, std::min<uint8>(_baseLevel + uint8(_killsCount / std::max<uint8>(mylevel * 5 / 2, 20)), mapmaxlevel));
+            mylevel = std::max<uint8>(mylevel, std::min<uint8>(_baseLevel + uint8(_killsCount / (mylevel * 20)), mapmaxlevel));
         }
     }
     else
