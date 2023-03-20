@@ -58,6 +58,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
 
     TC_LOG_INFO("server.loading", "Setting up wander map...");
 
+    //                                             0    1   2 3 4 5   6      7       8        9      10   11    12
     QueryResult wres = WorldDatabase.Query("SELECT id,mapid,x,y,z,o,zoneId,areaId,minlevel,maxlevel,flags,name,links FROM creature_template_npcbot_wander_nodes ORDER BY mapid,id");
     if (!wres)
     {
@@ -66,25 +67,25 @@ void BotDataMgr::LoadWanderMap(bool reload)
     }
 
     bool spawn_node_exists = false;
-    std::unordered_map<uint32, std::pair<WanderNode*, std::vector<std::vector<std::string_view>>>> links_to_create;
+    std::unordered_map<uint32, std::pair<WanderNode*, std::vector<std::pair<std::string, std::string>>>> links_to_create;
     do
     {
         Field* fields = wres->Fetch();
         uint32 index = 0;
 
-        uint32 id        = fields[  index].GetUInt32();
-        uint32 mapId     = fields[++index].GetUInt16();
-        float x          = fields[++index].GetFloat();
-        float y          = fields[++index].GetFloat();
-        float z          = fields[++index].GetFloat();
-        float o          = fields[++index].GetFloat();
-        uint32 zoneId    = fields[++index].GetUInt32();
-        uint32 areaId    = fields[++index].GetUInt32();
-        uint8 minLevel   = fields[++index].GetUInt8();
-        uint8 maxLevel   = fields[++index].GetUInt8();
-        uint32 flags     = fields[++index].GetUInt32();
-        std::string name = fields[++index].GetString();
-        char const* lstr = fields[++index].GetCString();
+        uint32 id             = fields[  index].GetUInt32();
+        uint32 mapId          = fields[++index].GetUInt16();
+        float x               = fields[++index].GetFloat();
+        float y               = fields[++index].GetFloat();
+        float z               = fields[++index].GetFloat();
+        float o               = fields[++index].GetFloat();
+        uint32 zoneId         = fields[++index].GetUInt32();
+        uint32 areaId         = fields[++index].GetUInt32();
+        uint8 minLevel        = fields[++index].GetUInt8();
+        uint8 maxLevel        = fields[++index].GetUInt8();
+        uint32 flags          = fields[++index].GetUInt32();
+        std::string name      = fields[++index].GetString();
+        std::string_view lstr = fields[++index].GetStringView();
 
         WanderNode::nextWPId = std::max<uint32>(WanderNode::nextWPId, id);
         spawn_node_exists |= !!(flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_SPAWN));
@@ -118,7 +119,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
         wp->SetLevels(minLevel, maxLevel);
         wp->SetFlags(BotWPFlags(flags));
 
-        if (!lstr)
+        if (lstr.empty())
         {
             TC_LOG_WARN("server.loading", "WP %u has no links!", id);
             continue;
@@ -127,14 +128,17 @@ void BotDataMgr::LoadWanderMap(bool reload)
         for (std::vector<std::string_view>::size_type i = 0; i != tok.size(); ++i)
         {
             std::vector<std::string_view> link_str = Trinity::Tokenize(tok[i], ':', false);
-            ASSERT(link_str.size() == 2u, "Invalid links_str format: '%s'", tok[i].data());
-            ASSERT(Trinity::StringTo<uint32>(link_str[0]) != std::nullopt, "Invalid links_str format: '%s'", tok[i].data());
-            ASSERT(Trinity::StringTo<uint32>(link_str[1]) != std::nullopt, "Invalid links_str format: '%s'", tok[i].data());
+            ASSERT(link_str.size() == 2u, "Invalid links_str format: '%s'", tok[i]);
+            ASSERT(link_str[0].find(" ") == std::string_view::npos);
+            ASSERT(link_str[1].find(" ") == std::string_view::npos);
+            ASSERT(Trinity::StringTo<uint32>(link_str[0]) != std::nullopt, "Invalid links_str format: '%s'", tok[i]);
+            ASSERT(Trinity::StringTo<uint32>(link_str[1]) != std::nullopt, "Invalid links_str format: '%s'", tok[i]);
 
+            std::pair<std::string, std::string> tok_pair = { std::string(link_str[0].data(), link_str[0].length()), std::string(link_str[1].data(), link_str[1].length()) };
             if (links_to_create.find(id) == links_to_create.cend())
-                links_to_create[id] = { wp, {std::move(link_str)} };
+                links_to_create[id] = { wp, {std::move(tok_pair)} };
             else
-                links_to_create.at(id).second.push_back(std::move(link_str));
+                links_to_create.at(id).second.push_back(std::move(tok_pair));
         }
 
     } while (wres->NextRow());
@@ -150,9 +154,9 @@ void BotDataMgr::LoadWanderMap(bool reload)
     float maxdist = 0.f;
     for (auto const& vt : links_to_create)
     {
-        for (auto const& vec : vt.second.second)
+        for (auto const& p : vt.second.second)
         {
-            uint32 lid = *Trinity::StringTo<uint32>(vec[0]);
+            uint32 lid = *Trinity::StringTo<uint32>(p.first);
             if (lid == vt.first)
             {
                 TC_LOG_ERROR("server.loading", "WP %u has link %u which links to itself! Skipped.", vt.first, lid);
@@ -167,17 +171,14 @@ void BotDataMgr::LoadWanderMap(bool reload)
             }
             if (lwp->GetMapId() != vt.second.first->GetMapId())
             {
-                TC_LOG_ERROR("server.loading", "WP %u map %u has link %u ON A DIFFERENT MAP %u!",
-                    vt.first, vt.second.first->GetMapId(), lid, lwp->GetMapId());
+                TC_LOG_ERROR("server.loading", "WP %u map %u has link %u ON A DIFFERENT MAP %u!", vt.first, vt.second.first->GetMapId(), lid, lwp->GetMapId());
                 continue;
             }
             float lwpdist2d = vt.second.first->GetExactDist2d(lwp);
             if (lwpdist2d > MAX_VISIBILITY_DISTANCE * 1.5f)
-                TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is too great (%.2f)",
-                    vt.first, lid, lwpdist2d);
+                TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is too great (%.2f)", vt.first, lid, lwpdist2d);
             if (lwpdist2d < VISIBILITY_DISTANCE_NORMAL * 0.5f)
-                TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is low (%.2f)",
-                    vt.first, lid, lwpdist2d);
+                TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is low (%.2f)", vt.first, lid, lwpdist2d);
 
             if (!vt.second.first->HasLink(lwp))
             {
@@ -591,7 +592,7 @@ void BotDataMgr::GenerateWanderingBots()
 
     NodeVec spawns_a, spawns_h, spawns_rest;
     for (NodeVec* vec : { &spawns_a, &spawns_h, &spawns_rest })
-        vec->reserve(WanderNode::GetAllWPsCount() / (WanderNode::GetWPMapsCount() + 1u));
+        vec->reserve(WanderNode::GetWPMapsCount() * 20u);
 
     /// @TODO: manage allowed world maps HERE: 0, 1 530, 571
     WanderNode::DoForAllWPs([&spawns_a, &spawns_h, &spawns_rest](WanderNode const* wp) {
@@ -603,7 +604,11 @@ void BotDataMgr::GenerateWanderingBots()
             else if (flags & AsUnderlyingType(BotWPFlags::BOTWP_FLAG_HORDE_ONLY))
                 spawns_h.push_back(wp);
             else
+            {
+                spawns_a.push_back(wp);
+                spawns_h.push_back(wp);
                 spawns_rest.push_back(wp);
+            }
         }
     });
 
