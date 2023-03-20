@@ -17196,6 +17196,7 @@ bool bot_ai::FinishTeleport(/*uint32 mapId, uint32 instanceId, float x, float y,
         return false;
     }
 
+    BotMgr::AddDelayedTeleportCallback([this]() {
         Map* map = master->FindMap();
         //2) Cannot teleport: map not found or forbidden - delay teleport
         if (!map || !master->IsAlive() || master->GetBotMgr()->RestrictBots(me, true))
@@ -17204,7 +17205,7 @@ bool bot_ai::FinishTeleport(/*uint32 mapId, uint32 instanceId, float x, float y,
             //ch.PSendSysMessage("Your bot %s cannot teleport to you. Restricted bot access on this map...", me->GetName().c_str());
             teleFinishEvent = new TeleportFinishEvent(this);
             Events.AddEvent(teleFinishEvent, Events.CalculateTime(std::chrono::seconds(5)));
-        return false;
+            return;
         }
 
         me->SetMap(map);
@@ -17244,6 +17245,7 @@ bool bot_ai::FinishTeleport(/*uint32 mapId, uint32 instanceId, float x, float y,
         //map hooks
         if (InstanceScript* iscr = master->GetInstanceScript())
             iscr->OnNPCBotEnter(me);
+    });
 
     return true;
 }
