@@ -870,7 +870,7 @@ public:
                         //direct spell
                         if (spell->m_targets.GetUnitTarget() == me &&
                             spell->GetSpellInfo()->DmgClass == SPELL_DAMAGE_CLASS_MAGIC &&
-                            me->IsWithinLOSInMap(target))
+                            me->IsWithinLOSInMap(target, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
                         {
                             count += 2;
                         }
