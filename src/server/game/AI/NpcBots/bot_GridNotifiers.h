@@ -87,7 +87,7 @@ class ImmunityShieldDispelTargetCheck
             if (!u->HasAuraWithMechanic(1<<MECHANIC_IMMUNE_SHIELD))
                 return false;
 
-            if (!u->IsWithinLOSInMap(me))
+            if (!u->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
                 return false;
 
             return true;
@@ -138,16 +138,11 @@ class NearestHostileUnitCheck
             if (!berserk && !ai->IsInBotParty(u->GetVictim()))
                 return INVALID;
 
-            if (free)
-            {
-                if (!berserk && u->IsControlledByPlayer() && !u->IsInCombat())
-                    return INVALID;
-            }
-            else
-            {
-                if (!u->IsWithinLOSInMap(me))
-                    return INVALID;
-            }
+            if (free && !berserk && u->IsControlledByPlayer() && !u->IsInCombat())
+                return INVALID;
+
+            if (!u->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS))
+                return INVALID;
 
             uint32 res = VALID_PRIMARY;
             if (!ai->CanBotAttack(u, byspell))

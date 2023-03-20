@@ -786,7 +786,7 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
 
         if ((flags & TRIGGERED_FULL_MASK) != TRIGGERED_FULL_MASK &&
             !(m_botSpellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) &&
-            !IsInBotParty(victim) && !me->IsWithinLOSInMap(victim))
+            !IsInBotParty(victim) && !me->IsWithinLOSInMap(victim, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
             return false;
     }
 
@@ -831,7 +831,7 @@ bool bot_ai::doCast(Unit* victim, uint32 spellId, TriggerCastFlags flags)
         me->BotStopMovement();
     }
 
-    if ((!victim->isType(TYPEMASK_UNIT) || IsInBotParty(victim)) && !victim->IsWithinLOSInMap(me) &&
+    if ((!victim->isType(TYPEMASK_UNIT) || IsInBotParty(victim)) && !victim->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2) &&
         !HasBotCommandState(BOT_COMMAND_STAY) && !me->GetVehicle())
     {
         if (!IAmFree())
@@ -1565,7 +1565,7 @@ void bot_ai::ResurrectGroup(uint32 spell_id)
         if (!playerOrCorpse)
             return;
 
-        if (!playerOrCorpse->IsWithinLOSInMap(me))
+        if (!playerOrCorpse->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
             me->Relocate(*playerOrCorpse);
 
         Unit* target = playerOrCorpse->GetTypeId() == TYPEID_PLAYER ? playerOrCorpse->ToUnit() : (Unit*)playerOrCorpse->ToCorpse();
@@ -1598,7 +1598,7 @@ void bot_ai::ResurrectGroup(uint32 spell_id)
                     //me->GetMotionMaster()->MovePoint(master->GetMapId(), *target);
                     return;
                 }
-                else if (me->GetDistance(target) < 15 && !target->IsWithinLOSInMap(me))
+                else if (me->GetDistance(target) < 15 && !target->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
                     me->Relocate(*target);
 
                 if (doCast(target, spell_id))//rezzing it
@@ -1615,7 +1615,7 @@ void bot_ai::ResurrectGroup(uint32 spell_id)
             target = bitr->second;
             if (!target || !target->IsInWorld() || target->IsAlive()) continue;
             if (bitr->second->GetBotAI()->GetReviveTimer() < 15000) continue;
-            if (me->GetDistance(target) < 30 && target->IsWithinLOSInMap(me) &&
+            if (me->GetDistance(target) < 30 && target->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2) &&
                 !player->GetBotMgr()->IsBeingResurrected(target))
                 bottargets.push_back(bitr->second);
         }
@@ -1646,7 +1646,7 @@ void bot_ai::ResurrectGroup(uint32 spell_id)
                 }
                 continue;
             }
-            else if (me->GetDistance(target) < 15 && !target->IsWithinLOSInMap(me))
+            else if (me->GetDistance(target) < 15 && !target->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
                 me->Relocate(*target);
 
             if (doCast(target, spell_id))//rezzing it
@@ -1672,7 +1672,7 @@ void bot_ai::ResurrectGroup(uint32 spell_id)
                 target = bitr->second;
                 if (!target || !target->IsInWorld() || target->IsAlive()) continue;
                 if (bitr->second->GetBotAI()->GetReviveTimer() < 15000) continue;
-                if (me->GetDistance(target) < 30 && target->IsWithinLOSInMap(me) &&
+                if (me->GetDistance(target) < 30 && target->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2) &&
                     !player->GetBotMgr()->IsBeingResurrected(target))
                     bottargets.push_back(bitr->second);
             }
@@ -3573,7 +3573,7 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell, bool secondary) cons
 
     uint8 followdist = IAmFree() ? BotMgr::GetBotFollowDistDefault() : master->GetBotMgr()->GetBotFollowDist();
     float foldist = _getAttackDistance(float(followdist));
-    if (!IAmFree() && IsRanged() && me->IsWithinLOSInMap(target))
+    if (!IAmFree() && IsRanged() && me->IsWithinLOSInMap(target, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
         _extendAttackRange(foldist);
 
     SpellSchoolMask mainMask;
@@ -4181,7 +4181,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
             !IsWanderer() && me->GetDistance(mytar) > foldist :
             HasBotCommandState(BOT_COMMAND_STAY) ?
             (!IsRanged() ? !me->IsWithinMeleeRange(mytar) : me->GetDistance(mytar) > foldist) :
-            (master->GetDistance(mytar) > foldist || (master->GetDistance(mytar) > foldist * 0.75f && !mytar->IsWithinLOSInMap(me)));
+            (master->GetDistance(mytar) > foldist || (master->GetDistance(mytar) > foldist * 0.75f && !mytar->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2)));
     }
     if (dropTarget)
     {
@@ -4992,7 +4992,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
     }
 
     pos.Relocate(ppos);
-    if (!me->IsWithinLOSInMap(target))
+    if (!me->IsWithinLOSInMap(target, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
         force = true;
 }
 // Forces bot to chase opponent (if ranged then distance depends on follow distance)
@@ -14583,7 +14583,7 @@ bool bot_ai::UpdateImpossibleChase(Unit const* target)
     if (_unreachableCount < 5)
     {
         if ((IsRanged() ? me->GetDistance(target) > 40.0f : !me->IsWithinMeleeRange(target)) ||
-            (target->GetTypeId() == TYPEID_UNIT && !me->IsWithinLOSInMap(target)))
+            (target->GetTypeId() == TYPEID_UNIT && !me->IsWithinLOSInMap(target, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2)))
         {
             ++_unreachableCount;
             ResetChaseTimer(target);
@@ -16319,7 +16319,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                     interrupt = true; // immune
                 else if (i != CURRENT_CHANNELED_SPELL && //channeled targeted spells will be interrupted in Spell::update()
                     spell->GetCastTime() < spell->GetTimer() * 3 && // >=33% cast time remains
-                    !me->IsWithinLOSInMap(target))
+                    !me->IsWithinLOSInMap(target, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
                     interrupt = true; //LoS
                 else if (info->Id == 64382 && !target->HasAuraWithMechanic(1<<MECHANIC_IMMUNE_SHIELD))
                     interrupt = true; //Shattering Throw wasting

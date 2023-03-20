@@ -1375,7 +1375,7 @@ Unit* bot_pet_ai::_getTarget(bool &reset) const
     {
         dropTarget = IAmFree() ?
             petOwner->GetDistance(mytar) > foldist :
-            (petOwner->GetBotOwner()->GetDistance(mytar) > foldist || (petOwner->GetBotOwner()->GetDistance(mytar) > foldist * 0.75f && !mytar->IsWithinLOSInMap(petOwner)));
+            (petOwner->GetBotOwner()->GetDistance(mytar) > foldist || (petOwner->GetBotOwner()->GetDistance(mytar) > foldist * 0.75f && !mytar->IsWithinLOSInMap(petOwner, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2)));
     }
     if (dropTarget)
         return nullptr;
@@ -1496,7 +1496,7 @@ void bot_pet_ai::GetInPosition(bool force, Unit* newtarget, Position* mypos)
             attackpos.m_positionY = mypos->m_positionY;
             attackpos.m_positionZ = mypos->m_positionZ;
         }
-        if (me->GetExactDist2d(&attackpos) > 4.f || !me->IsWithinLOSInMap(newtarget))
+        if (me->GetExactDist2d(&attackpos) > 4.f || !me->IsWithinLOSInMap(newtarget, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
         {
             me->GetMotionMaster()->MovePoint(newtarget->GetMapId(), attackpos);
             if (!me->HasUnitState(UNIT_STATE_MELEE_ATTACKING))
@@ -2371,7 +2371,7 @@ bool bot_pet_ai::GlobalUpdate(uint32 diff)
             else
             {
                 CalculateAttackPos(victim, attackpos);
-                if (me->GetExactDist2d(&attackpos) > 4.f || !me->IsWithinLOSInMap(victim))
+                if (me->GetExactDist2d(&attackpos) > 4.f || !me->IsWithinLOSInMap(victim, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
                     GetInPosition(true, victim, &attackpos);
             }
         }

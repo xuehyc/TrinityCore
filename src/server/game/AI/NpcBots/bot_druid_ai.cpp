@@ -1565,7 +1565,7 @@ public:
                     SetSpellCooldown(REBIRTH_1, 1500);
                     return;
                 }
-                else if (!target->IsWithinLOSInMap(me))
+                else if (!target->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
                     me->Relocate(*target);
 
                 if (doCast(target, GetSpell(REBIRTH_1))) //rezzing
@@ -1606,7 +1606,7 @@ public:
                     me->GetMotionMaster()->MovePoint(targetOrCorpse->GetMapId(), *targetOrCorpse);
                     return;
                 }
-                else if (!targetOrCorpse->IsWithinLOSInMap(me))
+                else if (!targetOrCorpse->IsWithinLOSInMap(me, LINEOFSIGHT_ALL_CHECKS, VMAP::ModelIgnoreFlags::M2))
                     me->Relocate(*targetOrCorpse);
 
                 if (doCast(targetOrCorpse, GetSpell(REBIRTH_1))) //rezzing
