@@ -828,9 +828,9 @@ void BotMgr::_reviveBot(Creature* bot, WorldLocation* dest)
     //bot->GetBotAI()->Reset();
     bot->GetBotAI()->SetShouldUpdateStats();
 
-    bot->SetHealth(bot->GetMaxHealth() / 4); //25% of max health
+    bot->SetHealth(bot->GetMaxHealth() / (bot->IsWandererBot() ? 1 : 4)); //25% of max health
     if (bot->GetMaxPower(POWER_MANA) > 1)
-        bot->SetPower(POWER_MANA, bot->GetMaxPower(POWER_MANA) / 4); //25% of max mana
+        bot->SetPower(POWER_MANA, bot->GetMaxPower(POWER_MANA) / (bot->IsWandererBot() ? 1 : 4)); //25% of max mana
 
     if (!bot->GetBotAI()->IAmFree() && !bot->GetBotAI()->HasBotCommandState(BOT_COMMAND_MASK_UNMOVING))
         bot->GetBotAI()->SetBotCommandState(BOT_COMMAND_FOLLOW, true);
