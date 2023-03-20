@@ -16970,7 +16970,7 @@ void bot_ai::Evade()
 
         if (!me->isMoving())
         {
-            if (dist > 12.5f)
+            if (dist > 15.0f)
             {
                 bool use_path = true;
                 GetNextEvadeMovePoint(pos, use_path);
@@ -17067,10 +17067,9 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
 
     float fulldist = std::min<float>(me->GetExactDist2d(pos), float((MAX_POINT_PATH_LENGTH - 1) * SMOOTH_PATH_STEP_SIZE - 2.0f));
     PathGenerator path(me);
-    while (path.GetPathType() == PATHFIND_BLANK ||
-        (path.GetPathType() & (PATHFIND_NOPATH | PATHFIND_SHORTCUT | PATHFIND_SHORT | PATHFIND_INCOMPLETE)))
+    while (path.GetPathType() == PATHFIND_BLANK || (path.GetPathType() & (PATHFIND_NOPATH | PATHFIND_SHORTCUT | PATHFIND_SHORT)))
     {
-        if (std::fabs(fulldist - me->GetExactDist2d(pos)) > 5.0f)
+        if (std::fabs(fulldist - me->GetExactDist2d(pos)) > 15.0f)
         {
             pos.Relocate(me->m_positionX, me->m_positionY, me->m_positionZ);
             pos.m_positionX += fulldist * std::cos(me->ToAbsoluteAngle(base_angle));
@@ -17090,7 +17089,9 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
         }
 
         path.CalculatePath(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-        if (path.GetPathType() == PATHFIND_BLANK || (path.GetPathType() & (PATHFIND_NORMAL | PATHFIND_FARFROMPOLY_START)))
+        if (path.GetPathType() == PATHFIND_BLANK ||
+            (path.GetPathType() == PATHFIND_INCOMPLETE && path.GetPath().size() > 2) ||
+            (path.GetPathType() & (PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH | PATHFIND_FARFROMPOLY_START)))
             break;
 
         fulldist *= 0.72f;
@@ -17099,13 +17100,15 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
             break;
     }
 
-    if (path.GetPathType() & (PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH))
+    if ((path.GetPathType() & (PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH)) == (PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH) &&
+        path.GetPath().size() > 2)
         return;
 
     switch (path.GetPathType())
     {
         case PATHFIND_NOT_USING_PATH: //swimming
         case PATHFIND_NORMAL: //found path
+            path.ShortenPathUntilDist(path.GetEndPosition(), frand(7.5f, 15.0f));
             return;
         case PATHFIND_BLANK: // invalid coords
         case PATHFIND_NOPATH:
@@ -17115,49 +17118,42 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
         case PATHFIND_FARFROMPOLY: // invalid coords
         case PATHFIND_FARFROMPOLY_START: //invalid start coords
         case PATHFIND_FARFROMPOLY_END: //invalid end coords
-        default:
+            if (path.GetPath().size() > 2)
+            {
+                path.ShortenPathUntilDist(path.GetEndPosition(), frand(5.0f, 15.0f));
+                return;
+            }
             //log error and use direct point movement
             TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u can't find full path to node %u (res %u) from pos %s, falling back to default PF!",
                 me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()), _travel_node_cur, uint32(path.GetPathType()),
                 me->GetPosition().ToString().c_str());
+        default:
+            if (me->IsInWater())
+                TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u is pathing from water!",
+                    me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()));
             break;
     }
 
     use_path = false;
 
-    if (_evadeCount >= evade_jump_threshold)
-    {
-        Position mypos = me->GetPosition();
-        mypos.m_positionX += fulldist * std::cos(me->ToAbsoluteAngle(base_angle));
-        mypos.m_positionY += fulldist * std::sin(me->ToAbsoluteAngle(base_angle));
-        Trinity::NormalizeMapCoord(mypos.m_positionX);
-        Trinity::NormalizeMapCoord(pos.m_positionY);
+    //below ground or in water - move to surface
+    Position mypos = me->GetPosition();
+    mypos.m_positionX += fulldist * std::cos(me->ToAbsoluteAngle(base_angle)) * 0.15f;
+    mypos.m_positionY += fulldist * std::sin(me->ToAbsoluteAngle(base_angle)) * 0.15f;
+    Trinity::NormalizeMapCoord(mypos.m_positionX);
+    Trinity::NormalizeMapCoord(pos.m_positionY);
 
-        ground = me->GetMapHeight(mypos.m_positionX, mypos.m_positionY, MAX_HEIGHT, true, MAX_FALL_DISTANCE);
-        floor = me->GetMapHeight(mypos.m_positionX, mypos.m_positionY, pos.m_positionZ);
-        mypos.m_positionZ = std::fabs(ground - mypos.m_positionZ) <= std::fabs(floor - mypos.m_positionZ) ? ground : floor;
-        if (mypos.m_positionZ <= INVALID_HEIGHT)
-            mypos.m_positionZ = me->GetPositionZ();
-        pos.Relocate(mypos);
-        return;
-    }
-
-    //below ground - move to surface
-    if (!me->HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
-    {
-        Position mypos = me->GetPosition();
-        mypos.m_positionX += fulldist * std::cos(me->ToAbsoluteAngle(base_angle)) * 0.15f;
-        mypos.m_positionY += fulldist * std::sin(me->ToAbsoluteAngle(base_angle)) * 0.15f;
-        Trinity::NormalizeMapCoord(mypos.m_positionX);
-        Trinity::NormalizeMapCoord(pos.m_positionY);
-
-        ground = me->GetMapHeight(mypos.m_positionX, mypos.m_positionY, MAX_HEIGHT, true, MAX_FALL_DISTANCE);
-        floor = me->GetMapHeight(mypos.m_positionX, mypos.m_positionY, mypos.m_positionZ);
-        mypos.m_positionZ = std::fabs(ground - mypos.m_positionZ) <= std::fabs(floor - mypos.m_positionZ) ? ground : floor;
-        if (mypos.m_positionZ <= INVALID_HEIGHT)
-            mypos.m_positionZ = me->GetPositionZ();
-        pos.Relocate(mypos);
-    }
+    ground = me->GetMapHeight(mypos.m_positionX, mypos.m_positionY, MAX_HEIGHT, true, MAX_FALL_DISTANCE);
+    floor = me->GetMapHeight(mypos.m_positionX, mypos.m_positionY, mypos.m_positionZ);
+    mypos.m_positionZ = std::fabs(ground - mypos.m_positionZ) <= std::fabs(floor - mypos.m_positionZ) ? ground : floor;
+    LiquidData ldata;
+    ZLiquidStatus lstatus = me->GetMap()->GetLiquidStatus(
+        me->GetPhaseMask(), mypos.m_positionX, mypos.m_positionY, mypos.m_positionZ, MAP_ALL_LIQUIDS, &ldata, me->GetCollisionHeight());
+    if (me->IsInWater() != !!(lstatus & MAP_LIQUID_STATUS_IN_CONTACT))
+        mypos.m_positionZ = std::max<float>(ldata.level, mypos.m_positionZ);
+    if (mypos.m_positionZ <= INVALID_HEIGHT)
+        mypos.m_positionZ = me->GetPositionZ();
+    pos.Relocate(mypos);
 }
 //TeleportHome() ONLY CALLED THROUGH EVENTPROCESSOR
 void bot_ai::TeleportHome()
@@ -17200,54 +17196,54 @@ bool bot_ai::FinishTeleport(/*uint32 mapId, uint32 instanceId, float x, float y,
         return false;
     }
 
-    Map* map = master->FindMap();
-    //2) Cannot teleport: map not found or forbidden - delay teleport
-    if (!map || !master->IsAlive() || master->GetBotMgr()->RestrictBots(me, true))
-    {
-        //ChatHandler ch(master->GetSession());
-        //ch.PSendSysMessage("Your bot %s cannot teleport to you. Restricted bot access on this map...", me->GetName().c_str());
-        teleFinishEvent = new TeleportFinishEvent(this);
-        Events.AddEvent(teleFinishEvent, Events.CalculateTime(std::chrono::seconds(5)));
+        Map* map = master->FindMap();
+        //2) Cannot teleport: map not found or forbidden - delay teleport
+        if (!map || !master->IsAlive() || master->GetBotMgr()->RestrictBots(me, true))
+        {
+            //ChatHandler ch(master->GetSession());
+            //ch.PSendSysMessage("Your bot %s cannot teleport to you. Restricted bot access on this map...", me->GetName().c_str());
+            teleFinishEvent = new TeleportFinishEvent(this);
+            Events.AddEvent(teleFinishEvent, Events.CalculateTime(std::chrono::seconds(5)));
         return false;
-    }
+        }
 
-    me->SetMap(map);
-    if (master->GetTransport())
-    {
-        master->GetTransport()->AddPassenger(me);
-        me->m_movementInfo.transport.pos.Relocate(master->GetTransOffset());
-        me->Relocate(GetAbsoluteTransportPosition(master));
-        me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
-    }
-    else
-    {
-        Position destpos;
-        _calculatePos(destpos);
-        me->Relocate(destpos);
-    }
+        me->SetMap(map);
+        if (master->GetTransport())
+        {
+            master->GetTransport()->AddPassenger(me);
+            me->m_movementInfo.transport.pos.Relocate(master->GetTransOffset());
+            me->Relocate(GetAbsoluteTransportPosition(master));
+            me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+        }
+        else
+        {
+            Position destpos;
+            _calculatePos(destpos);
+            me->Relocate(destpos);
+        }
 
-    map->AddToMap(me);
-    me->BotStopMovement();
-    //bot->SetAI(oldAI);
-    //me->IsAIEnabled = true;
-    canUpdate = true;
+        map->AddToMap(me);
+        me->BotStopMovement();
+        //bot->SetAI(oldAI);
+        //me->IsAIEnabled = true;
+        canUpdate = true;
 
-    //master->m_Controlled.insert(me);
-    if (me->IsAlive())
-    {
-        CastSpellExtraArgs args(TRIGGERED_FULL_MASK);
-        me->CastSpell(me, COSMETIC_TELEPORT_EFFECT, args);
-    }
-    //me->CastSpell(me, HONORLESS_TARGET, true);
+        //master->m_Controlled.insert(me);
+        if (me->IsAlive())
+        {
+            CastSpellExtraArgs args(TRIGGERED_FULL_MASK);
+            me->CastSpell(me, COSMETIC_TELEPORT_EFFECT, args);
+        }
+        //me->CastSpell(me, HONORLESS_TARGET, true);
 
-    //update group member online state
-    if (Group* gr = master->GetGroup())
-        if (gr->IsMember(me->GetGUID()))
-            gr->SendUpdate();
+        //update group member online state
+        if (Group* gr = master->GetGroup())
+            if (gr->IsMember(me->GetGUID()))
+                gr->SendUpdate();
 
-    //map hooks
-    if (InstanceScript* iscr = master->GetInstanceScript())
-        iscr->OnNPCBotEnter(me);
+        //map hooks
+        if (InstanceScript* iscr = master->GetInstanceScript())
+            iscr->OnNPCBotEnter(me);
 
     return true;
 }
