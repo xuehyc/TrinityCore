@@ -3565,6 +3565,7 @@ bool bot_ai::CanBotAttack(Unit const* target, int8 byspell, bool secondary) cons
             case 33229: case 33243: case 33272: // AT Training dummy targets
             case 4952: case 17578: case 24792: case 30527: case 31143: case 31144: case 31146: // training dummy
             case 32541: case 32542: case 32543: case 32545: case 32546: case 32547: case 32666: case 32667: // training dummy
+            case 7668: case 7669: case 7670: case 7671: // Blasted Lands servants
                 return false;
             default:
                 break;
@@ -17023,42 +17024,6 @@ void bot_ai::Evade()
     me->SetFacingTo(pos.GetOrientation());
     me->SetFaction(me->GetCreatureTemplate()->faction);
 }
-void MovePositionEx(Position& pos, float dist, float angle, Unit const* u)
-{
-    angle += u->GetOrientation();
-    float destx, desty, destz, ground, floor;
-    destx = pos.m_positionX + dist * std::cos(angle);
-    desty = pos.m_positionY + dist * std::sin(angle);
-
-    ground = u->GetMapHeight(destx, desty, MAX_HEIGHT);
-    floor = u->GetMapHeight(destx, desty, pos.m_positionZ);
-    destz = std::fabs(ground - pos.m_positionZ) <= std::fabs(floor - pos.m_positionZ) ? ground : floor;
-
-    float step = dist/10.0f;
-
-    for (uint8 j = 0; j < 10; ++j)
-    {
-        // do not allow too big z changes
-        if (std::fabs(pos.m_positionZ - destz) > 15.0f)
-        {
-            destx -= step * std::cos(angle);
-            desty -= step * std::sin(angle);
-            ground = u->GetMapHeight(destx, desty, MAX_HEIGHT);
-            floor = u->GetMapHeight(destx, desty, pos.m_positionZ);
-            destz = std::fabs(ground - pos.m_positionZ) <= std::fabs(floor - pos.m_positionZ) ? ground : floor;
-        }
-        else
-        {
-            pos.Relocate(destx, desty, destz);
-            break;
-        }
-    }
-
-    Trinity::NormalizeMapCoord(pos.m_positionX);
-    Trinity::NormalizeMapCoord(pos.m_positionY);
-    u->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-    pos.SetOrientation(u->GetOrientation());
-}
 void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
 {
     const uint8 evade_jump_threshold = me->HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING) ? 50 : 25;
@@ -17101,7 +17066,7 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
     }
 
     if ((path.GetPathType() & (PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH)) == (PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH) &&
-        path.GetPath().size() > 2)
+        path.GetPath().size() > 4)
         return;
 
     switch (path.GetPathType())
@@ -17118,7 +17083,7 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
         case PATHFIND_FARFROMPOLY: // invalid coords
         case PATHFIND_FARFROMPOLY_START: //invalid start coords
         case PATHFIND_FARFROMPOLY_END: //invalid end coords
-            if (path.GetPath().size() > 2)
+            if (path.GetPath().size() > 4)
             {
                 path.ShortenPathUntilDist(path.GetEndPosition(), frand(5.0f, 15.0f));
                 return;
@@ -17136,10 +17101,11 @@ void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
 
     use_path = false;
 
-    //below ground or in water - move to surface
+    // No path: proceed to destination in small steps, maybe it's just a fluke... Move to surface if needed
     Position mypos = me->GetPosition();
-    mypos.m_positionX += fulldist * std::cos(me->ToAbsoluteAngle(base_angle)) * 0.15f;
-    mypos.m_positionY += fulldist * std::sin(me->ToAbsoluteAngle(base_angle)) * 0.15f;
+    float movedist = std::max<float>(fulldist * 0.15f, 15.0f);
+    mypos.m_positionX += movedist * std::cos(me->ToAbsoluteAngle(base_angle));
+    mypos.m_positionY += movedist * std::sin(me->ToAbsoluteAngle(base_angle));
     Trinity::NormalizeMapCoord(mypos.m_positionX);
     Trinity::NormalizeMapCoord(pos.m_positionY);
 
