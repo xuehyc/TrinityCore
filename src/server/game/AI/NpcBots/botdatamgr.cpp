@@ -455,11 +455,11 @@ void BotDataMgr::LoadWanderMap(bool reload)
         for (std::vector<std::string_view>::size_type i = 0; i != tok.size(); ++i)
         {
             std::vector<std::string_view> link_str = Trinity::Tokenize(tok[i], ':', false);
-            ASSERT(link_str.size() == 2u, "Invalid links_str format: '%s'", tok[i]);
+            ASSERT(link_str.size() == 2u, "Invalid links_str format: '%s'", std::string(tok[i].data(), tok[i].length()).c_str());
             ASSERT(link_str[0].find(" ") == std::string_view::npos);
             ASSERT(link_str[1].find(" ") == std::string_view::npos);
-            ASSERT(Trinity::StringTo<uint32>(link_str[0]) != std::nullopt, "Invalid links_str format: '%s'", tok[i]);
-            ASSERT(Trinity::StringTo<uint32>(link_str[1]) != std::nullopt, "Invalid links_str format: '%s'", tok[i]);
+            ASSERT(Trinity::StringTo<uint32>(link_str[0]) != std::nullopt, "Invalid links_str format: '%s'", std::string(tok[i].data(), tok[i].length()).c_str());
+            ASSERT(Trinity::StringTo<uint32>(link_str[1]) != std::nullopt, "Invalid links_str format: '%s'", std::string(tok[i].data(), tok[i].length()).c_str());
 
             std::pair<std::string, std::string> tok_pair = { std::string(link_str[0].data(), link_str[0].length()), std::string(link_str[1].data(), link_str[1].length()) };
             if (links_to_create.find(id) == links_to_create.cend())
