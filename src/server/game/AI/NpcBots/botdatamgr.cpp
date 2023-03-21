@@ -84,9 +84,6 @@ void BotDataMgr::Update(uint32 diff)
     ASSERT(bot_data);
     ASSERT(bot_extras);
 
-    CellCoord c = Trinity::ComputeCellCoord(spawnLoc->m_positionX, spawnLoc->m_positionY);
-    GridCoord g = Trinity::ComputeGridCoord(spawnLoc->m_positionX, spawnLoc->m_positionY);
-
     Map* map = sMapMgr->CreateBaseMap(spawnLoc->GetMapId());
     map->LoadGrid(spawnLoc->m_positionX, spawnLoc->m_positionY);
 
