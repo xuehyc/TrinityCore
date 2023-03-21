@@ -2235,7 +2235,7 @@ void bot_ai::SetStats(bool force)
             {
                 auto [minlevel, maxlevel] = BotDataMgr::GetWanderMapNodeLevels(me->GetMap()->GetEntry()->ID, _travel_node_cur);
                 ASSERT(minlevel > 0 && minlevel > 0);
-                mylevel = std::min<uint8>(urand(std::min<uint8>(minlevel + 2, maxlevel), maxlevel), maxlevel);
+                mylevel = urand(std::min<uint8>(minlevel + 2, maxlevel), maxlevel);
                 mylevel += BotDataMgr::GetLevelBonusForBotRank(me->GetCreatureTemplate()->rank);
                 _baseLevel = mylevel;
                 TC_LOG_DEBUG("npcbots", "Wandering bot %s id %u selected level %u...", me->GetName().c_str(), me->GetEntry(), uint32(_baseLevel));
@@ -10847,75 +10847,6 @@ void bot_ai::_autoLootCreature(Creature* creature)
 //////////
 //EQUIPS//
 //////////
-bool bot_ai::_canGenerateEquipmentInSlot(uint8 slot, bool empty_only) const
-{
-    EquipmentInfo const* einfo = BotDataMgr::GetBotEquipmentInfo(me->GetEntry());
-    ASSERT(einfo);
-
-    switch (slot)
-    {
-        case BOT_SLOT_MAINHAND:
-            return !empty_only || _equips[slot] == nullptr || _equips[slot]->GetEntry() != einfo->ItemEntry[slot];
-        case BOT_SLOT_OFFHAND:
-            if (_canUseOffHand())
-            {
-                switch (_botclass)
-                {
-                    case BOT_CLASS_PRIEST: case BOT_CLASS_MAGE: case BOT_CLASS_WARLOCK: case BOT_CLASS_DRUID:
-                        return false;
-                    default:
-                        return !empty_only || _equips[slot] == nullptr || _equips[slot]->GetEntry() != einfo->ItemEntry[slot];
-                }
-            }
-            break;
-        case BOT_SLOT_RANGED:
-            if (_canUseRanged())
-                return !empty_only || _equips[slot] == nullptr || _equips[slot]->GetEntry() != einfo->ItemEntry[slot];
-            break;
-        case BOT_SLOT_HEAD:
-        case BOT_SLOT_SHOULDERS:
-        case BOT_SLOT_CHEST:
-        case BOT_SLOT_WAIST:
-        case BOT_SLOT_LEGS:
-        case BOT_SLOT_FEET:
-        case BOT_SLOT_WRIST:
-        case BOT_SLOT_HANDS:
-            return !empty_only || _equips[slot] == nullptr;
-        case BOT_SLOT_TRINKET1:
-        case BOT_SLOT_TRINKET2:
-            if (me->GetLevel() < 40)
-                return false;
-            [[fallthrough]];
-        case BOT_SLOT_NECK:
-            if (me->GetLevel() < 25)
-                return false;
-            [[fallthrough]];
-        case BOT_SLOT_FINGER1:
-        case BOT_SLOT_FINGER2:
-            if (me->GetLevel() < 20)
-                return false;
-            [[fallthrough]];
-        case BOT_SLOT_BACK:
-            if (me->GetLevel() < 10)
-                return false;
-            switch (_botclass)
-            {
-                case BOT_CLASS_SPHYNX:
-                    break;
-                default:
-                    return !empty_only || _equips[slot] == nullptr;
-            }
-            break;
-        case BOT_SLOT_BODY:
-            break;
-        default:
-            TC_LOG_ERROR("scripts", "bot_ai::_canGenerateEquipmentInSlot: invalid slot %u!", uint32(slot));
-            break;
-    }
-
-    return false;
-}
-
 bool bot_ai::_canUseOffHand() const
 {
     //bm can on only equip in main hand
@@ -11264,11 +11195,6 @@ bool bot_ai::_canEquip(ItemTemplate const* newProto, uint8 slot, bool ignoreItem
             case BOT_CLASS_SPHYNX:
                 switch (newProto->SubClass)
                 {
-                    //case ITEM_SUBCLASS_WEAPON_MACE:
-                    //case ITEM_SUBCLASS_WEAPON_MACE2:
-                    //case ITEM_SUBCLASS_WEAPON_SWORD:
-                    //case ITEM_SUBCLASS_WEAPON_DAGGER:
-                    //case ITEM_SUBCLASS_WEAPON_STAFF:
                     case ITEM_SUBCLASS_WEAPON_WAND:
                         break;
                     default:
@@ -11871,213 +11797,6 @@ bool bot_ai::_resetEquipment(uint8 slot, ObjectGuid receiver)
         return false;
     }
     return true;
-}
-
-void bot_ai::_generateGear()
-{
-    if (_equipsSlotsToGenerate.empty())
-        return;
-    if (Rand() > uint16(25 + 2 * std::max<int32>(BOT_INVENTORY_SIZE - _equipsSlotsToGenerate.size(), 0)))
-        return;
-
-    static const uint8 ITEMS_PER_CHECK = 100u;
-
-    static auto next_item_id = [](uint32 itemEntry, uint32 myEntry) -> uint32 {
-        return itemEntry + 1 + itemEntry % ((myEntry % 20) + 1);
-    };
-
-    uint32 itemId = urand(20u, 45000u);
-    for (uint8 n = 0; n < ITEMS_PER_CHECK;)
-    {
-        if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId))
-        {
-            bool skip1 = false;
-            switch (proto->Class)
-            {
-                case ITEM_CLASS_ARMOR:
-                    break;
-                case ITEM_CLASS_WEAPON:
-                    if (proto->Damage[0].DamageMin < 1.0f)
-                        skip1 = true;
-                    break;
-                default:
-                    skip1 = true;
-                    break;
-            }
-            switch (proto->Quality)
-            {
-                case ITEM_QUALITY_NORMAL: case ITEM_QUALITY_UNCOMMON: case ITEM_QUALITY_RARE: case ITEM_QUALITY_EPIC:
-                    break;
-                default:
-                    skip1 = true;
-                    break;
-            }
-            if ((proto->RequiredLevel == 0 && proto->ItemLevel > uint32(me->GetLevel() * 3)) ||
-                proto->RequiredLevel + 25 <= me->GetLevel() || me->GetLevel() < proto->RequiredLevel)
-            {
-                skip1 = true;
-                break;
-            }
-            if (skip1)
-            {
-                ++n;
-                ++itemId;
-                continue;
-            }
-            for (BotEquipSlot slot : _equipsSlotsToGenerate)
-            {
-                if (_canEquip(proto, slot, true))
-                {
-                    Item* newItem = Item::CreateItem(itemId, 1, nullptr);
-                    if (!newItem)
-                    {
-                        TC_LOG_ERROR("npcbots", "bot_ai::_generateGear: Failed to create item %u (%s), slot %u!",
-                            itemId, proto->Name1.c_str(), uint32(slot));
-                        return;
-                    }
-                    if (uint32 randomPropertyId = GenerateItemRandomPropertyId(itemId))
-                        newItem->SetItemRandomProperties(randomPropertyId);
-                    //additional conditions go here
-                    bool skip2 = false;
-                    switch (slot)
-                    {
-                        case BOT_SLOT_MAINHAND:
-                            switch (_botclass)
-                            {
-                                case BOT_CLASS_WARRIOR:
-                                    if (proto->InventoryType != INVTYPE_2HWEAPON && me->GetLevel() >= 60 * uint8(_spec == BOT_SPEC_WARRIOR_FURY))
-                                        skip2 = true;
-                                    break;
-                                case BOT_CLASS_PALADIN:
-                                    if (proto->InventoryType != INVTYPE_2HWEAPON && _spec == BOT_SPEC_PALADIN_RETRIBUTION)
-                                        skip2 = true;
-                                    break;
-                                case BOT_CLASS_DEATH_KNIGHT: case BOT_CLASS_PRIEST: case BOT_CLASS_MAGE: case BOT_CLASS_WARLOCK: case BOT_CLASS_DRUID:
-                                    if (proto->InventoryType != INVTYPE_2HWEAPON && !_equips[BOT_SLOT_OFFHAND])
-                                        skip2 = true;
-                                    break;
-                                case BOT_CLASS_DREADLORD: case BOT_CLASS_BM:
-                                    if (proto->InventoryType != INVTYPE_2HWEAPON)
-                                        skip2 = true;
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        case BOT_SLOT_OFFHAND:
-                            switch (_botclass)
-                            {
-                                case BOT_CLASS_WARRIOR:
-                                    if (proto->Class != ITEM_CLASS_WEAPON && _spec == BOT_SPEC_WARRIOR_FURY)
-                                        skip2 = true;
-                                    else if (proto->InventoryType != INVTYPE_SHIELD && _spec == BOT_SPEC_WARRIOR_PROTECTION)
-                                        skip2 = true;
-                                    break;
-                                case BOT_CLASS_PALADIN:
-                                    if (_spec == BOT_SPEC_PALADIN_RETRIBUTION)
-                                        skip2 = true;
-                                    break;
-                                case BOT_CLASS_ROGUE: case BOT_CLASS_HUNTER: case BOT_CLASS_DEATH_KNIGHT: case BOT_CLASS_DARK_RANGER: case BOT_CLASS_SEA_WITCH:
-                                    if (proto->Class != ITEM_CLASS_WEAPON)
-                                        skip2 = true;
-                                    break;
-                                case BOT_CLASS_SHAMAN:
-                                    if (_spec == BOT_SPEC_SHAMAN_ENHANCEMENT)
-                                    {
-                                        if (proto->Class != ITEM_CLASS_WEAPON)
-                                            skip2 = true;
-                                    }
-                                    else if (proto->InventoryType != INVTYPE_SHIELD)
-                                        skip2 = true;
-                                    break;
-                                case BOT_CLASS_SPELLBREAKER:
-                                    if (proto->InventoryType != INVTYPE_SHIELD)
-                                        skip2 = true;
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        case BOT_SLOT_RANGED:
-                            if (proto->Class != ITEM_CLASS_WEAPON)
-                                skip2 = true;
-                            break;
-                        case BOT_SLOT_HEAD:
-                        case BOT_SLOT_SHOULDERS:
-                        case BOT_SLOT_CHEST:
-                        case BOT_SLOT_WAIST:
-                        case BOT_SLOT_LEGS:
-                        case BOT_SLOT_FEET:
-                        case BOT_SLOT_WRIST:
-                        case BOT_SLOT_HANDS:
-                            if (proto->Class != ITEM_CLASS_ARMOR)
-                                skip2 = true;
-                            else
-                            {
-                                switch (_botclass)
-                                {
-                                    case BOT_CLASS_WARRIOR: case BOT_CLASS_PALADIN: case BOT_CLASS_DEATH_KNIGHT:
-                                        if (me->GetLevel() >= 40 && proto->SubClass != ITEM_SUBCLASS_ARMOR_PLATE)
-                                            skip2 = true;
-                                        break;
-                                    case BOT_CLASS_HUNTER: case BOT_CLASS_SHAMAN:
-                                        if (me->GetLevel() >= 40 && proto->SubClass != ITEM_SUBCLASS_ARMOR_MAIL)
-                                            skip2 = true;
-                                        break;
-                                    case BOT_CLASS_ROGUE:
-                                        if (proto->SubClass != ITEM_SUBCLASS_ARMOR_LEATHER)
-                                            skip2 = true;
-                                        break;
-                                    case BOT_CLASS_DRUID:
-                                        if (_spec == BOT_SPEC_DRUID_FERAL && proto->SubClass != ITEM_SUBCLASS_ARMOR_LEATHER)
-                                            skip2 = true;
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                            [[fallthrough]];
-                        default:
-                            if (!skip2 && proto->Class == ITEM_CLASS_ARMOR &&
-                                (proto->ItemLevel == 0 || proto->Armor == 0 || _getItemGearScore(proto, slot, newItem) < 0.25f))
-                                skip2 = true;
-                            break;
-                    }
-
-                    if (skip2)
-                        continue;
-
-                    if (!_equip(slot, newItem, ObjectGuid::Empty))
-                    {
-                        TC_LOG_DEBUG("npcbots", "bot_ai::_generateGear: Failed to equip item %u (%s), slot %u!",
-                            itemId, proto->Name1.c_str(), uint32(slot));
-                        return;
-                    }
-
-                    //TC_LOG_ERROR("scripts", "bot_ai::_generateGear: Bot %s (%u) equipped item %u (%s), slot %u! Left: %u",
-                    //    me->GetName().c_str(), me->GetEntry(), itemId, proto->Name1.c_str(), uint32(slot), uint32(_equipsSlotsToGenerate.size() - 1));
-
-                    if (slot != BOT_SLOT_OFFHAND && proto->Class == ITEM_CLASS_WEAPON && proto->InventoryType == INVTYPE_2HWEAPON &&
-                        !_canUseOffHand() && _equipsSlotsToGenerate.count(BOT_SLOT_OFFHAND) != 0)
-                    {
-                        _equipsSlotsToGenerate.erase(BOT_SLOT_OFFHAND);
-                    }
-
-                    _equipsSlotsToGenerate.erase(slot);
-                    break;
-                }
-            }
-        }
-
-        if (_equipsSlotsToGenerate.empty())
-            break;
-
-        ++n;
-        itemId = next_item_id(itemId, me->GetEntry());
-    }
-
-    if (_equipsSlotsToGenerate.empty())
-        TC_LOG_DEBUG("npcbots", "bot_ai::_generateGear: Bot %s (%u) gear generation complete!", me->GetName().c_str(), me->GetEntry());
 }
 
 void bot_ai::ApplyItemBonuses(uint8 slot)
@@ -13557,6 +13276,13 @@ void bot_ai::DefaultInit()
 
     InitSpec();
     InitRoles();
+
+    if (IsWanderer())
+    {
+        _travel_node_cur = BotDataMgr::GetClosestWanderNodeId(me);
+        ASSERT(_travel_node_cur != 0);
+    }
+
     SetStats(true); // Class passives included
 
     if (!IsTempBot())
@@ -14034,16 +13760,32 @@ void bot_ai::InitEquips()
     PreparedQueryResult iiresult;
     if (IsWanderer())
     {
-        //iiresult = {};
-        _equipsSlotsToGenerate.clear();
         std::ostringstream gss;
-        gss << "bot_ai::InitEquips(): Wanderer bot " << me->GetName() << " (" << me->GetEntry() << ") slots to generate gear:";
+        gss << "bot_ai::InitEquips(): Wanderer bot " << me->GetName() << " id " << me->GetEntry() << ' ' << "level " << uint32(me->GetLevel()) << " generated gear:";
         for (uint8 i = BOT_SLOT_MAINHAND; i < BOT_INVENTORY_SIZE; ++i)
         {
-            if (_canGenerateEquipmentInSlot(i, false))
+            if (i == BOT_SLOT_OFFHAND && !_canUseOffHand())
+                continue;
+
+            Item* item = BotDataMgr::GenerateWanderingBotItem(i, _botclass, me->GetLevel(),
+                [this, lslot = i](ItemTemplate const* proto) { return _canEquip(proto, lslot, true); });
+
+            if (!item)
             {
-                _equipsSlotsToGenerate.insert(BotEquipSlot(i));
-                gss << " " << uint32(i);
+                if (i <= BOT_SLOT_RANGED && einfo->ItemEntry[i] != 0)
+                {
+                    TC_LOG_ERROR("npcbots", "Wanderer bot %s id %u level %u can't generate req gear in slot %u, generating standard item!",
+                        me->GetName().c_str(), me->GetEntry(), uint32(me->GetLevel()), uint32(i));
+
+                    item = Item::CreateItem(einfo->ItemEntry[i], 1);
+                    ASSERT(item, "Failed to init standard Item for wandering bot!");
+                    _equips[i] = item;
+                }
+            }
+            else
+            {
+                _equips[i] = item;
+                gss << " [" << uint32(i) << "] " << _equips[i]->GetTemplate()->Name1 << " (" << _equips[i]->GetEntry() << ')';
             }
         }
         TC_LOG_TRACE("npcbots", gss.str().c_str());
@@ -14059,52 +13801,48 @@ void bot_ai::InitEquips()
             stmt->setUInt32(i, npcBotData->equips[i]);
 
         iiresult = CharacterDatabase.Query(stmt);
-    }
 
-    uint32 itemId;
-    uint32 itemGuidLow;
-    Item* item;
-
-    if (!iiresult) //blank bot - fill with standard items
-    {
-        for (uint8 i = 0; i != MAX_EQUIPMENT_ITEMS; ++i)
+        if (!iiresult) //blank bot - fill with standard items
         {
-            itemId = einfo->ItemEntry[i];
-            if (!itemId)
-                continue;
-
-            item = Item::CreateItem(itemId, 1, nullptr);
-            ASSERT(item, "Failed to init standard Item for bot!");
-            _equips[i] = item;
-        }
-    }
-    else
-    {
-        Field* fields2;
-        do
-        {
-            fields2 = iiresult->Fetch();
-            itemGuidLow = fields2[11].GetUInt32();
-            itemId = fields2[12].GetUInt32();
-            item = new Item;
-            ASSERT(item->LoadFromDB(itemGuidLow, ObjectGuid::Empty, fields2, itemId));
-            //gonna find where to store our new item
-            bool found = false;
-            for (uint8 i = BOT_SLOT_MAINHAND; i != BOT_INVENTORY_SIZE; ++i)
+            for (uint8 i = 0; i != MAX_EQUIPMENT_ITEMS; ++i)
             {
-                if (npcBotData->equips[i] == itemGuidLow && !_equips[i])
-                {
-                    _equips[i] = item;
-                    found = true;
-                    break;
-                }
-            }
-            ASSERT(found);
-            //ItemTemplate const* proto = item->GetTemplate();
-            //TC_LOG_ERROR("entities.player", "minion_ai::InitEquips(): bot %s (id: %u): found item: for slot %u: %s (id: %u, guidLow: %u)",
-            //    me->GetName().c_str(), me->GetEntry(), i, proto->Name1.c_str(), itemId, itemGuidLow);
+                uint32 itemId = einfo->ItemEntry[i];
+                if (!itemId)
+                    continue;
 
-        } while (iiresult->NextRow());
+                Item* item = Item::CreateItem(itemId, 1, nullptr);
+                ASSERT(item, "Failed to init standard Item for bot!");
+                _equips[i] = item;
+            }
+        }
+        else
+        {
+            Field* fields2;
+            do
+            {
+                fields2 = iiresult->Fetch();
+                uint32 itemGuidLow = fields2[11].GetUInt32();
+                uint32 itemId = fields2[12].GetUInt32();
+                Item* item = new Item;
+                ASSERT(item->LoadFromDB(itemGuidLow, ObjectGuid::Empty, fields2, itemId));
+                //gonna find where to store our new item
+                bool found = false;
+                for (uint8 i = BOT_SLOT_MAINHAND; i != BOT_INVENTORY_SIZE; ++i)
+                {
+                    if (npcBotData->equips[i] == itemGuidLow && !_equips[i])
+                    {
+                        _equips[i] = item;
+                        found = true;
+                        break;
+                    }
+                }
+                ASSERT(found);
+                //ItemTemplate const* proto = item->GetTemplate();
+                //TC_LOG_ERROR("entities.player", "minion_ai::InitEquips(): bot %s (id: %u): found item: for slot %u: %s (id: %u, guidLow: %u)",
+                //    me->GetName().c_str(), me->GetEntry(), i, proto->Name1.c_str(), itemId, itemGuidLow);
+
+            } while (iiresult->NextRow());
+        }
     }
 
     //visualize
@@ -14125,7 +13863,7 @@ void bot_ai::InitEquips()
     //apply weapons' parameters
     if (Item const* MH = _equips[BOT_SLOT_MAINHAND])
     {
-        itemId = MH->GetEntry();
+        uint32 itemId = MH->GetEntry();
         if (einfo->ItemEntry[0] != itemId)
         {
             if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId))
@@ -14138,7 +13876,7 @@ void bot_ai::InitEquips()
     }
     if (Item const* OH = _equips[BOT_SLOT_OFFHAND])
     {
-        itemId = OH->GetEntry();
+        uint32 itemId = OH->GetEntry();
         if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId))
         {
             if (einfo->ItemEntry[1] != itemId)
@@ -14159,7 +13897,7 @@ void bot_ai::InitEquips()
     }
     if (Item const* RH = _equips[BOT_SLOT_RANGED])
     {
-        itemId = RH->GetEntry();
+        uint32 itemId = RH->GetEntry();
         if (einfo->ItemEntry[2] != itemId)
         {
             if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId))
@@ -14186,7 +13924,7 @@ void bot_ai::InitEquips()
                 continue;
 
             //if bot has no equips but equip template then use those
-            item = Item::CreateItem(einfo->ItemEntry[i], 1, nullptr);
+            Item* item = Item::CreateItem(einfo->ItemEntry[i], 1, nullptr);
             ASSERT(item, "Failed to init standard Item for bot point 2!");
             _equips[i] = item;
 
@@ -16812,9 +16550,6 @@ bool bot_ai::GlobalUpdate(uint32 diff)
 
     _updateMountedState();
     _updateStandState();
-
-    if (IsWanderer())
-        _generateGear();
 
     return true;
 }

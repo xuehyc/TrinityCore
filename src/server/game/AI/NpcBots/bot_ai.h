@@ -567,7 +567,6 @@ class bot_ai : public CreatureAI
         void _autoLootCreatureItems(Player* receiver, Creature* creature, uint32 lootQualityMask, uint32 lootThreshold) const;
         void _autoLootCreature(Creature* creature);
 
-        bool _canGenerateEquipmentInSlot(uint8 slot, bool empty_only = false) const;
         bool _canUseOffHand() const;
         bool _canUseRanged() const;
         bool _canUseRelic() const;
@@ -575,7 +574,6 @@ class bot_ai : public CreatureAI
         bool _unequip(uint8 slot, ObjectGuid receiver);
         bool _equip(uint8 slot, Item* newItem, ObjectGuid receiver);
         bool _resetEquipment(uint8 slot, ObjectGuid receiver);
-        void _generateGear();
 
         void _castBotItemUseSpell(Item const* item, SpellCastTargets const& targets/*, uint8 cast_count = 0, uint32 glyphIndex = 0*/);
 
@@ -654,7 +652,6 @@ class bot_ai : public CreatureAI
         uint8 _baseLevel;
         uint32 _travel_node_last;
         uint32 _travel_node_cur;
-        std::unordered_set<BotEquipSlot> _equipsSlotsToGenerate;
         std::vector<std::pair<uint32, std::string>> _travelHistory;
 
         float _energyFraction;

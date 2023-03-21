@@ -3,16 +3,20 @@
 
 #include "botcommon.h"
 
+#include <functional>
 #include <set>
 #include <shared_mutex>
 #include <vector>
 
 class Creature;
+class Item;
 class WanderNode;
+class WorldLocation;
 
 struct EquipmentInfo;
 struct CreatureTemplate;
 struct FactionEntry;
+struct ItemTemplate;
 struct Position;
 
 enum LocaleConstant : uint8;
@@ -163,6 +167,8 @@ class BotDataMgr
 
         static void LoadWanderMap(bool reload = false);
         static void GenerateWanderingBots();
+        static void CreateWanderingBotsSortedGear();
+        static Item* GenerateWanderingBotItem(uint8 slot, uint8 botclass, uint8 level, std::function<bool(ItemTemplate const*)>&& check);
         static CreatureTemplate const* GetBotExtraCreatureTemplate(uint32 entry);
         static EquipmentInfo const* GetBotEquipmentInfo(uint32 entry);
 
@@ -173,6 +179,7 @@ class BotDataMgr
         static TeamId GetTeamForFaction(uint32 factionTemplateId);
         static bool IsWanderNodeAvailableForBotFaction(WanderNode const* wp, uint32 factionTemplateId);
         static std::pair<uint32, Position const*> GetNextWanderNode(uint32 mapId, uint32 curNodeId, uint32 lastNodeId, uint8 lvl, Creature const* bot);
+        static uint32 GetClosestWanderNodeId(WorldLocation const* loc);
         static Position GetWanderMapNodePosition(uint32 mapId, uint32 nodeId);
         static std::string GetWanderMapNodeName(uint32 mapId, uint32 nodeId);
         static std::pair<uint8, uint8> GetWanderMapNodeLevels(uint32 mapId, uint32 nodeId);
