@@ -1879,7 +1879,7 @@ std::pair<uint32, Position const*> BotDataMgr::GetNextWanderNode(uint32 mapId, u
         {
             if (IsWanderNodeAvailableForBotFaction(*cit, bot->GetFaction()) &&
                 ((*cit)->GetWPId() == lastNodeId || lvl + 6 >= (*cit)->GetLevels().first ||
-                lvl + 2 >= (*cit)->GetLevels().first && lvl <= (*cit)->GetLevels().second))
+                (lvl + 2 >= (*cit)->GetLevels().first && lvl <= (*cit)->GetLevels().second)))
                 ++cit;
             else
                 cit = linksCopy.erase(cit);
