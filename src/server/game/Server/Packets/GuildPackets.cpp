@@ -967,3 +967,10 @@ WorldPacket const* WorldPackets::Guild::GuildNameChanged::Write()
 
     return &_worldPacket;
 }
+
+WorldPacket const* WorldPackets::Guild::GuildChangeNameResult::Write()
+{
+    _worldPacket.WriteBit(Success);
+
+    return &_worldPacket;
+}

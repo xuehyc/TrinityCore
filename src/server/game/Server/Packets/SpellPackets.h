@@ -189,21 +189,27 @@ namespace WorldPackets
             SpellCastVisual Visual;
             uint16 Flags = 0;
             uint32 ActiveFlags = 0;
-            uint16 CastLevel = 1;
-            uint8 Applications = 1;
+            uint16 CastLevel = 0;
+            uint8 Applications = 0;
             int32 ContentTuningID = 0;
+            bool HasCastUnit = false;
+            bool HasDuration = false;
+            bool HasRemaining = false;
+            bool HasTimeMod = false;
+            std::vector<float> Points;
+            std::vector<float> EstimatedPoints;
+            bool HasContentTuning = false;
             Optional<ContentTuningParams> ContentTuning;
             Optional<ObjectGuid> CastUnit;
             Optional<int32> Duration;
             Optional<int32> Remaining;
             Optional<float> TimeMod;
-            std::vector<float> Points;
-            std::vector<float> EstimatedPoints;
         };
 
         struct AuraInfo
         {
             uint8 Slot = 0;
+            bool HasAura = false;
             Optional<AuraDataInfo> AuraData;
         };
 
@@ -215,8 +221,9 @@ namespace WorldPackets
             WorldPacket const* Write() override;
 
             bool UpdateAll = false;
-            ObjectGuid UnitGUID;
+            uint8 AurasCount = 0;
             std::vector<AuraInfo> Auras;
+            ObjectGuid UnitGUID;
         };
 
         struct TargetLocation

@@ -9782,9 +9782,9 @@ uint32 ObjectMgr::LoadReferenceVendor(int32 vendor, int32 item, std::set<uint32>
             vItem.incrtime          = fields[2].GetUInt32();
             vItem.ExtendedCost      = fields[3].GetUInt32();
 			vItem.OverrideGoldCost  = fields[4].GetInt64();
-            vItem.Type              = fields[6].GetUInt8();
-            vItem.PlayerConditionId = fields[8].GetUInt32();
-            vItem.IgnoreFiltering   = fields[9].GetBool();
+            vItem.Type              = fields[5].GetUInt8();
+            vItem.PlayerConditionId = fields[7].GetUInt32();
+            vItem.IgnoreFiltering   = fields[8].GetBool();
 
             for (std::string_view token : Trinity::Tokenize(fields[5].GetStringView(), ' ', false))
                 if (Optional<int32> bonusListID = Trinity::StringTo<int32>(token))

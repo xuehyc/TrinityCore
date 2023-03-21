@@ -1188,6 +1188,16 @@ namespace WorldPackets
             ObjectGuid GuildGUID;
             std::string GuildName;
         };
+
+        class GuildChangeNameResult final : public ServerPacket
+        {
+        public:
+            GuildChangeNameResult() : ServerPacket(SMSG_GUILD_CHANGE_NAME_RESULT, 1) { }
+
+            WorldPacket const* Write() override;
+
+            bool Success = true;
+        };
     }
 }
 
