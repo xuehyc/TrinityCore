@@ -16765,7 +16765,7 @@ void bot_ai::Evade()
 }
 void bot_ai::GetNextEvadeMovePoint(Position& pos, bool& use_path) const
 {
-    const uint8 evade_jump_threshold = me->HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING) ? 50 : 25;
+    //const uint8 evade_jump_threshold = me->HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING) ? 50 : 25;
     const float base_angle = me->GetRelativeAngle(pos);
     float ground, floor;
 
