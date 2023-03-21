@@ -561,7 +561,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
     });
 
     TC_LOG_INFO("server.loading", ">> Loaded %u bot wander nodes on %u maps (total %u ribs, %u tops) in %u ms. Distances: min %.3f, max %.3f",
-        uint32(WanderNode::GetAllWPsCount()), uint32(WanderNode::GetWPMapsCount()), total_ribs, tops.size(),
+        uint32(WanderNode::GetAllWPsCount()), uint32(WanderNode::GetWPMapsCount()), total_ribs, uint32(tops.size()),
         GetMSTimeDiffToNow(botoldMSTime), mindist, maxdist);
 }
 
