@@ -1931,7 +1931,7 @@ BotMgr::delayed_teleport_mutex_type* BotMgr::_getTpLock()
 }
 void BotMgr::AddDelayedTeleportCallback(delayed_teleport_callback_type&& callback)
 {
-    delayed_teleport_lock_type(*_getTpLock());
+    delayed_teleport_lock_type lock(*_getTpLock());
     delayed_bot_teleports.push_back(std::forward<delayed_teleport_callback_type>(callback));
 }
 void BotMgr::HandleDelayedTeleports()
