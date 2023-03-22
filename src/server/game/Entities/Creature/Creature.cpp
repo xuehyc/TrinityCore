@@ -308,7 +308,7 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
-Creature::Creature(bool isWorldObject) : Unit(isWorldObject), MapObject(), m_PlayerDamageReq(0), _pickpocketLootRestore(0), m_dontClearTapListOnEvade(false),
+Creature::Creature(bool isWorldObject) : Unit(isWorldObject), MapObject(), m_PlayerDamageReq(0), m_dontClearTapListOnEvade(false), _pickpocketLootRestore(0),
     m_corpseRemoveTime(0), m_respawnTime(0), m_respawnDelay(300), m_corpseDelay(60), m_ignoreCorpseDecayRatio(false), m_wanderDistance(0.0f), m_boundaryCheckTime(2500), m_combatPulseTime(0), m_combatPulseDelay(0), m_reactState(REACT_AGGRESSIVE),
     m_defaultMovementType(IDLE_MOTION_TYPE), m_spawnId(UI64LIT(0)), m_equipmentId(0), m_originalEquipmentId(0), m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false), m_cannotReachTarget(false), m_cannotReachTimer(0),
     m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0), m_homePosition(), m_transportHomePosition(), m_creatureInfo(nullptr), m_creatureData(nullptr), _waypointPathId(0), _currentWaypointNodeInfo(0, 0),
@@ -661,7 +661,7 @@ bool Creature::UpdateEntry(uint32 entry, CreatureData const* data /*= nullptr*/,
 
     ReplaceAllUnitFlags(UnitFlags(unitFlags));
     ReplaceAllUnitFlags2(UnitFlags2(unitFlags2));
-    bool needsflag = m_outfit && Unit::GetDisplayId() == m_outfit->GetDisplayId();
+	bool needsflag = m_outfit && Unit::GetDisplayId() == m_outfit->GetDisplayId();
     if (needsflag)
         SetMirrorImageFlag(true);
     ReplaceAllUnitFlags3(UnitFlags3(unitFlags3));
@@ -1558,7 +1558,7 @@ void Creature::SaveToDB(uint32 mapid, std::vector<Difficulty> const& spawnDiffic
     data.dynamicflags = dynamicflags;
     if (!data.spawnGroupData)
         data.spawnGroupData = sObjectMgr->GetDefaultSpawnGroup();
-	if (data.size == 0.0f)
+		if (data.size == 0.0f)
     {
         // first save, use default if scale matches template or use custom scale if not
         if (cinfo && cinfo->scale == GetObjectScale())
@@ -2084,7 +2084,7 @@ bool Creature::hasInvolvedQuest(uint32 quest_id) const
     trans->Append(stmt);
 
     WorldDatabase.CommitTransaction(trans);
-
+	
 	RoleplayDatabasePreparedStatement* fstmt = RoleplayDatabase.GetPreparedStatement(Roleplay_DEL_CREATUREEXTRA);
     fstmt->setUInt64(0, spawnId);
 

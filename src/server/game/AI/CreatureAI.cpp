@@ -312,6 +312,7 @@ bool CreatureAI::_EnterEvadeMode(EvadeReason /*why*/)
     me->CombatStop(true);
     if (!me->IsTapListNotClearedOnEvade())
         me->SetTappedBy(nullptr);
+
     me->ResetPlayerDamageReq();
     me->SetLastDamagedTime(0);
     me->SetCannotReachTarget(false);
