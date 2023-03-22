@@ -502,7 +502,7 @@ void BotDataMgr::LoadWanderMap(bool reload)
                 continue;
             }
             float lwpdist2d = vt.second.first->GetExactDist2d(lwp);
-            if (lwpdist2d > MAX_VISIBILITY_DISTANCE * 1.5f)
+            if (lwpdist2d > SIZE_OF_GRIDS * 1.5f)
                 TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is too great (%.2f)", vt.first, lid, lwpdist2d);
             if (lwpdist2d < VISIBILITY_DISTANCE_NORMAL * 0.5f)
                 TC_LOG_WARN("server.loading", "Warning! Link distance between WP %u and %u is low (%.2f)", vt.first, lid, lwpdist2d);
