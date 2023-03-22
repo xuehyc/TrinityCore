@@ -1219,9 +1219,6 @@ void Roleplay::ReloadSpawnedCustomNpcs(std::string const& key)
             uint8 modelId = urand(0u, sObjectMgr->_creatureTemplateStore[data.templateId].Models.size() - 1);
             CreatureModel model = sObjectMgr->_creatureTemplateStore[data.templateId].Models[modelId];
             creature->SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
-            if (CreatureOutfit::IsFake(model.CreatureDisplayID)) {
-                creature->SetOutfit(sObjectMgr->_creatureOutfitStore[model.CreatureDisplayID]);
-            }
             creature->SetName(sObjectMgr->_creatureTemplateStore[data.templateId].Name);
             creature->LoadEquipment(urand(1u, sObjectMgr->_equipmentInfoStore[data.templateId].size()));
             TC_LOG_DEBUG("roleplay", "ROLEPLAY: Reloaded creature id '%lu'", spawn);

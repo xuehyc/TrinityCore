@@ -377,7 +377,7 @@ void Creature::RemoveFromWorld()
     }
 }
 
-void Creature::SetOutfit(std::shared_ptr<CreatureOutfit> const& outfit)
+void Creature::SetOutfit(std::shared_ptr<CreatureOutfit> const& outfit, float scale)
 {
     // Set new outfit
     if (m_outfit)
@@ -385,14 +385,14 @@ void Creature::SetOutfit(std::shared_ptr<CreatureOutfit> const& outfit)
         // if had old outfit
         // then delay displayid setting to allow equipment
         // to change by using invisible model in between
-        SetDisplayId(CreatureOutfit::invisible_model);
+        SetDisplayId(CreatureOutfit::invisible_model, scale);
         m_outfit = outfit;
     }
     else
     {
         // else set new outfit directly since we change from non-outfit->outfit
         m_outfit = outfit;
-        SetDisplayId(outfit->GetDisplayId());
+        SetDisplayId(outfit->GetDisplayId(), scale);
     }
 }
 
@@ -757,7 +757,7 @@ void Creature::Update(uint32 diff)
     {
         // has outfit, displayid is invisible and displayid update already sent to clients
         // set outfit display
-        SetDisplayId(m_outfit->GetDisplayId());
+        SetDisplayId(m_outfit->GetDisplayId(), m_unitData->DisplayScale);
     }
 	
     if (IsAIEnabled() && m_triggerJustAppeared && m_deathState != DEAD)
@@ -3388,7 +3388,7 @@ void Creature::SetDisplayId(uint32 modelId, float displayScale /*= 1.f*/)
 {
 	if (auto const& outfit = sObjectMgr->GetOutfit(modelId))
     {
-        SetOutfit(outfit);
+        SetOutfit(outfit, displayScale);
         return;
     }
     else
