@@ -722,17 +722,17 @@ void BotDataMgr::GenerateWanderingBots()
     }
     if (!found_maxlevel_node_a)
     {
-        LOG_FATAL("server.loading", "Not a single spawn point exists for Alliance DKs!");
+        TC_LOG_FATAL("server.loading", "Not a single spawn point exists for Alliance DKs!");
         ASSERT(false);
     }
     if (!found_maxlevel_node_h)
     {
-        LOG_FATAL("server.loading", "Not a single spawn point exists for Horde DKs!");
+        TC_LOG_FATAL("server.loading", "Not a single spawn point exists for Horde DKs!");
         ASSERT(false);
     }
     if (!found_maxlevel_node_rest)
     {
-        LOG_FATAL("server.loading", "Not a single spawn point exists for extra classes (level 60)!");
+        TC_LOG_FATAL("server.loading", "Not a single spawn point exists for extra classes (level 60)!");
         ASSERT(false);
     }
 

@@ -16872,7 +16872,7 @@ void bot_ai::TeleportHomeStart(bool reset)
     //if no master - will teleport to spawn position
     //otherwise - will teleport to master
     teleHomeEvent = new TeleportHomeEvent(this, reset);
-    Events.AddEvent(teleHomeEvent, Events.CalculateTime(0)); //make sure event will be deleted
+    Events.AddEvent(teleHomeEvent, Events.CalculateTime(0ms)); //make sure event will be deleted
     if (teleHomeEvent->IsActive())
         teleHomeEvent->ScheduleAbort(); //make sure event will not be executed twice
     teleHomeEvent->Execute(0,0);
