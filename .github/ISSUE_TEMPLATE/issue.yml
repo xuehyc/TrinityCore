@@ -37,7 +37,6 @@ body:
     attributes:
       label: Branch
       options:
-        - 3.3.5
         - master
     validations:
       required: true
