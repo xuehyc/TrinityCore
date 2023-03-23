@@ -1994,6 +1994,7 @@ enum OpcodeServer : uint16
     SMSG_TURN_IN_PETITION_RESULT                      = 0x2749,
     SMSG_TUTORIAL_FLAGS                               = 0x27B7,
     SMSG_UI_HEALING_RANGE_MODIFIED                    = 0x273E,
+    SMSG_UI_ITEM_INTERACTION_NPC                      = 0x27EF,
     SMSG_UI_MAP_QUEST_LINES_RESPONSE                  = 0x2AA2,
     SMSG_UNDELETE_CHARACTER_RESPONSE                  = 0x27C7,
     SMSG_UNDELETE_COOLDOWN_STATUS_RESPONSE            = 0x27C8,
