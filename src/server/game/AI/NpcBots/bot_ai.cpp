@@ -16634,7 +16634,7 @@ void bot_ai::UpdateReviveTimer(uint32 diff)
 
                 if (safePos.GetExactDist2d(homepos) > MAX_WANDER_NODE_DISTANCE)
                 {
-                    WanderNode const* nextNode = GetNextTravelNode(&safePos);
+                    WanderNode const* nextNode = GetNextTravelNode(&safePos, true);
                     if (!nextNode)
                     {
                         TC_LOG_FATAL("scripts", "Bot %s (%u) is unable to get next travel node (1)! cur %u, last %u, position: %s. BOT WAS DISABLED",
@@ -16759,7 +16759,7 @@ void bot_ai::Evade()
             }
             else if (IsWanderer())
             {
-                WanderNode const* nextNode = GetNextTravelNode(&pos);
+                WanderNode const* nextNode = GetNextTravelNode(&pos, false);
                 if (!nextNode)
                 {
                     TC_LOG_FATAL("npcbots", "Bot %s (%u) is unable to get next travel node! cur %u, last %u, position: %s. BOT WAS DISABLED",
@@ -17034,13 +17034,13 @@ void bot_ai::GetHomePosition(uint16& mapid, Position* pos) const
     }
 }
 
-WanderNode const* bot_ai::GetNextTravelNode(Position const* from) const
+WanderNode const* bot_ai::GetNextTravelNode(Position const* from, bool random) const
 {
     ASSERT(IsWanderer());
 
     int8 mylevelbonus = BotDataMgr::GetLevelBonusForBotRank(me->GetCreatureTemplate()->rank);
     uint8 mylevelbase = std::max<int8>(int8(me->GetLevel()) - mylevelbonus, int8(BotDataMgr::GetMinLevelForBotClass(_botclass)));
-    return BotDataMgr::GetNextWanderNode(_travel_node_cur, _travel_node_last, from, me->GetFaction(), mylevelbase);
+    return BotDataMgr::GetNextWanderNode(_travel_node_cur, _travel_node_last, from, me->GetFaction(), mylevelbase, random);
 }
 
 void bot_ai::SetWanderer()
