@@ -2901,6 +2901,7 @@ namespace LuaPlayer
         std::string message = Eluna::CHECKVAL<std::string>(L, 3);
 
         player->WhisperAddon(message, prefix, false, player);
+        std::cout << " Server check aio: " + message + " " + prefix + " " + (player->ToString()) << std::endl;
 
         return 0;
     }
