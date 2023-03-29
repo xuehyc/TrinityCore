@@ -16409,7 +16409,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         Regenerate();
 
     //update flags
-    if (!me->IsInCombat() && !_evadeMode && (_atHome || IsWanderer()))
+    if (!me->IsInCombat() && ((!_evadeMode && _atHome) || IsWanderer()))
     {
         if (!me->HasNpcFlag(UNIT_NPC_FLAG_GOSSIP) && !HasBotCommandState(BOT_COMMAND_NOGOSSIP))
             me->SetNpcFlag(UNIT_NPC_FLAG_GOSSIP);
@@ -16697,11 +16697,10 @@ void bot_ai::Evade()
     GetHomePosition(mapid, &pos);
 
     float dist = me->GetExactDist2d(pos);
-    float zdiff = fabs(me->GetPositionZ() - pos.GetPositionZ());
 
     if (IsWanderer())
     {
-        if (mapid != me->GetMap()->GetEntry()->ID || me->GetExactDist2d(pos) > MAX_WANDER_NODE_DISTANCE ||
+        if (mapid != me->GetMap()->GetEntry()->ID || _evadeCount >= 30 || me->GetExactDist2d(pos) > MAX_WANDER_NODE_DISTANCE ||
             (me->GetExactDist2d(pos) < 20.0f && me->GetExactDist(pos) > 100.0f))
         {
             TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u map %u TELEPORTING to node %u ('%s') map %u, %s, dist %.1f yd!",
@@ -16713,7 +16712,7 @@ void bot_ai::Evade()
             return;
         }
     }
-    else if (mapid != me->GetMapId() || _evadeCount >= 5 || me->GetDistance(pos) > float(SIZE_OF_GRIDS * 0.5f))
+    else if (mapid != me->GetMapId() || _evadeCount >= 10 || me->GetDistance(pos) > float(SIZE_OF_GRIDS * 0.5f))
     {
         if (!teleHomeEvent || !teleHomeEvent->IsActive())
         {
@@ -16741,17 +16740,13 @@ void bot_ai::Evade()
 
         if (!me->isMoving())
         {
-            if ((dist < 20.0f && zdiff > 30.0f) || me->GetExactDist2d(movepos) < 25.0f)
-                ++_evadeCount;
+            ++_evadeCount;
 
             if (dist > 15.0f)
             {
                 bool use_path = true;
                 GetNextEvadeMovePoint(pos, use_path);
                 ASSERT(pos.m_positionZ > INVALID_HEIGHT);
-
-                if (IsWanderer() && _evadeCount && me->GetExactDist2d(movepos) > 25.0f)
-                    _evadeCount = 0;
 
                 movepos.Relocate(me);
                 BotMovement(BOT_MOVE_POINT, &pos, nullptr, use_path);
@@ -16777,6 +16772,7 @@ void bot_ai::Evade()
                 _travel_node_last = _travel_node_cur;
                 _travel_node_cur = nextNode;
                 _travelHistory.push_back(std::make_pair(nextNode->GetWPId(), nextNode->GetName()));
+                _evadeCount = 0;
                 evadeDelayTimer = urand(7000, 11000);
                 return;
             }
