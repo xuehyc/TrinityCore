@@ -14493,7 +14493,7 @@ void bot_ai::JustDied(Unit* u)
             IsWanderer() ? "Wandering bot" : "Bot", me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()),
             (u->IsPlayer() ? "player" : u->IsNPCBot() ? u->ToCreature()->GetBotAI()->IsWanderer() ? "wandering bot" : "bot" : u->IsNPCBotPet() ? "botpet" : "creature"),
             u->GetName().c_str(), u->GetEntry(), uint32(u->GetClass()), uint32(u->GetLevel()),
-            _travel_node_cur->GetName().c_str());
+            IsWanderer() ? _travel_node_cur->GetName().c_str() : "''");
     }
 
     _reviveTimer = (IsWanderer() && !(u && u->IsControlledByPlayer())) ? 90000 : IAmFree() ? 180000 : 60000; //1.5min/3min/1min
@@ -14524,7 +14524,7 @@ void bot_ai::KilledUnit(Unit* u)
             TC_LOG_DEBUG("npcbots", "Bot %s id %u class %u level %u KILLED wandering bot %s id %u class %u level %u on their way to %s!",
                 me->GetName().c_str(), me->GetEntry(), uint32(_botclass), uint32(me->GetLevel()),
                 u->GetName().c_str(), u->GetEntry(), uint32(u->GetClass()), uint32(u->GetLevel()),
-                _travel_node_cur->GetName().c_str());
+                IsWanderer() ? _travel_node_cur->GetName().c_str() : "''");
         }
     }
     if (u->isType(TYPEMASK_PLAYER))
