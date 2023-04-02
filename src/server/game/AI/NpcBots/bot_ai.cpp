@@ -6810,7 +6810,10 @@ void bot_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
     {
         case WANDERER_HEARTHSTONE:
             if (IsWanderer())
+            {
                 BotMgr::TeleportBot(me, sMapMgr->CreateBaseMap(_travel_node_cur->GetMapId()), _travel_node_cur, true);
+                _evadeCount = 0;
+            }
             return;
         default:
             break;
