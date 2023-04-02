@@ -129,7 +129,7 @@ private:
         9, //RACE_BLOODELF
         4, //RACE_DRAENEI
     };
-    
+
     static constexpr uint32 SoundSetModelsArray[RACES_COUNT][GENDERS_COUNT][SOUND_SETS_COUNT] = {
         {{SOUNDSETMODEL_HUMAN_MALE_1, SOUNDSETMODEL_HUMAN_MALE_2, SOUNDSETMODEL_HUMAN_MALE_3}, {SOUNDSETMODEL_HUMAN_FEMALE_1, SOUNDSETMODEL_HUMAN_FEMALE_2, SOUNDSETMODEL_HUMAN_FEMALE_3}},
         {{SOUNDSETMODEL_DWARF_MALE_1, SOUNDSETMODEL_DWARF_MALE_2, SOUNDSETMODEL_DWARF_MALE_3}, {SOUNDSETMODEL_DWARF_FEMALE_1, SOUNDSETMODEL_DWARF_FEMALE_2, SOUNDSETMODEL_DWARF_FEMALE_3}},
@@ -299,9 +299,10 @@ private:
             case 148: // Darkshore
             case 3433: // Ghostlands
             case 3525: // Bloodmyst Isle
-            case 17: // Barrens
             case 721: // Gnomeregan
                 return { 8, 20 };
+            case 17: // Barrens
+                return { 8, 25 };
             case 44: // Redridge Mountains
             case 406: // Stonetalon Mountains
                 return { 13, 25 };
@@ -1003,7 +1004,7 @@ public:
         }
 
         WorldDatabase.PExecute("UPDATE creature_template_npcbot_wander_nodes SET flags=%u WHERE id=%u", wp->GetFlags(), wpId);
- 
+
         return true;
     }
     static bool HandleNpcBotWPSetNameCommand(ChatHandler* handler, Optional<std::string> newname)
