@@ -291,7 +291,7 @@ ElunaRegister<Unit> UnitMethods[] =
     { "SetMaxPower", &LuaUnit::SetMaxPower },
     { "SetPowerType", &LuaUnit::SetPowerType },
     { "SetDisplayId", &LuaUnit::SetDisplayId },
-    { "SetNativeDisplayId", &LuaUnit::SetNativeDisplayId },
+    //{ "SetNativeDisplayId", &LuaUnit::SetNativeDisplayId }, Trinity delete this func
     { "SetFacing", &LuaUnit::SetFacing },
     { "SetFacingToObject", &LuaUnit::SetFacingToObject },
     { "SetSpeed", &LuaUnit::SetSpeed },

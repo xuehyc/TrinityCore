@@ -9335,7 +9335,7 @@ void ObjectMgr::LoadCreatureOutfits()
     }
     while (result->NextRow());
 
-    TC_LOG_INFO("server.loading", ">> Loaded %u creature outfits in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    TC_LOG_INFO("server.loading", ">> Loaded {} creature outfits in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 std::shared_ptr<CreatureOutfit> const& ObjectMgr::GetOutfit(uint32 modelid) const

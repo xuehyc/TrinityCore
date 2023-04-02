@@ -1548,6 +1548,11 @@ class TC_GAME_API Unit : public WorldObject
         ObjectGuid m_SummonSlot[MAX_SUMMON_SLOT];
         ObjectGuid m_ObjectSlot[MAX_GAMEOBJECT_SLOT];
 
+        void AddSummonedCreature(ObjectGuid guid, uint32 entry);
+        void RemoveSummonedCreature(ObjectGuid guid);
+        Creature* GetSummonedCreatureByEntry(uint32 entry);
+        void UnsummonCreatureByEntry(uint32 entry, uint32 ms = 0);
+
         ShapeshiftForm GetShapeshiftForm() const { return ShapeshiftForm(*m_unitData->ShapeshiftForm); }
         void SetShapeshiftForm(ShapeshiftForm form);
 
@@ -1878,6 +1883,8 @@ class TC_GAME_API Unit : public WorldObject
         uint16 GetVirtualItemAppearanceMod(uint32 slot) const;
         void SetVirtualItem(uint32 slot, uint32 itemId, uint16 appearanceModId = 0, uint16 itemVisual = 0);
 
+        void GetFriendlyUnitListInRange(std::list<Unit*>& list, float fMaxSearchRange, bool exceptSelf = false) const;
+
         // returns if the unit can't enter combat
         bool IsCombatDisallowed() const { return _isCombatDisallowed; }
         // enables / disables combat interaction of this unit
@@ -2073,6 +2080,8 @@ class TC_GAME_API Unit : public WorldObject
 
         std::unique_ptr<MovementForces> _movementForces;
         PositionUpdateInfo _positionUpdateInfo;
+
+        std::unordered_map<ObjectGuid, uint32/*entry*/> m_SummonedCreatures;
 
         bool _isCombatDisallowed;
 };

@@ -782,8 +782,6 @@ void Roleplay::CreateCustomNpcFromPlayer(Player* player, std::string const& key)
 
     creatureTemplate.Name = key;
     creatureTemplate.GossipMenuId = 0;
-    creatureTemplate.minlevel = 1;
-    creatureTemplate.maxlevel = 1;
     creatureTemplate.HealthScalingExpansion = EXPANSION_SHADOWLANDS;
     creatureTemplate.RequiredExpansion = EXPANSION_CLASSIC;
     creatureTemplate.VignetteID = 0;
