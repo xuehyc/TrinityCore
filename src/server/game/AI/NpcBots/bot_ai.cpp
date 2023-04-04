@@ -16623,8 +16623,9 @@ void bot_ai::UpdateReviveTimer(uint32 diff)
 
             if (IsWanderer())
             {
+                TeamId my_team = BotDataMgr::GetTeamForFaction(me->GetFaction());
                 WorldSafeLocsEntry const* gy = sObjectMgr->GetClosestGraveyard(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetMapId(),
-                    me->GetFaction() == 1801 ? HORDE : ALLIANCE);
+                    my_team == TEAM_HORDE ? HORDE : ALLIANCE);
                 Position safePos;
                 if (gy)
                 {
