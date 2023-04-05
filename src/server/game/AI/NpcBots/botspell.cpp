@@ -1024,34 +1024,35 @@ void GenerateBotCustomSpells()
     sinfo->ManaCost = 6 * 5 * 2; //need to increase cost since ability is not autocast, has cd and deals more damage
     sinfo->MaxAffectedTargets = 1;
     sinfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_CHANGE_MAP;
-    sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
-    sinfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+    //sinfo->ExplicitTargetMask = TARGET_FLAG_UNIT;
+    sinfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK | SPELL_ATTR0_NEGATIVE_1;
     sinfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED;
     sinfo->AttributesEx2 |= SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS/* | SPELL_ATTR2_CANT_CRIT*/;
     sinfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
 
-    sinfo->_effects[0].Effect = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
-    sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-    sinfo->_effects[0].ApplyAuraName = SPELL_AURA_NONE;
-    sinfo->_effects[0].BasePoints = 150;
-    sinfo->_effects[0].DieSides = 0;
-    sinfo->_effects[0].BonusMultiplier = 1.f;
-    sinfo->_effects[0].DamageMultiplier = 1.f;
-    sinfo->_effects[0].RealPointsPerLevel = 0.f;
-    sinfo->_effects[0].ValueMultiplier = 1.f;
-    sinfo->_effects[0].RadiusEntry = nullptr;
-
-    sinfo->_effects[1].Effect = SPELL_EFFECT_APPLY_AURA;
+    sinfo->_effects[1].Effect = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
     sinfo->_effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-    sinfo->_effects[1].ApplyAuraName = SPELL_AURA_PERIODIC_DAMAGE;
-    sinfo->_effects[1].BasePoints = 100;
+    sinfo->_effects[1].ApplyAuraName = SPELL_AURA_NONE;
+    sinfo->_effects[1].BasePoints = 150;
     sinfo->_effects[1].DieSides = 0;
-    sinfo->_effects[1].BonusMultiplier = 2.f;
+    sinfo->_effects[1].BonusMultiplier = 1.f;
     sinfo->_effects[1].DamageMultiplier = 1.f;
-    sinfo->_effects[1].RealPointsPerLevel = 10.f;
+    sinfo->_effects[1].RealPointsPerLevel = 0.f;
     sinfo->_effects[1].ValueMultiplier = 1.f;
+    sinfo->_effects[1].Amplitude = 0;
     sinfo->_effects[1].RadiusEntry = nullptr;
-    sinfo->_effects[1].Amplitude = 2000;
+
+    //sinfo->_effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
+    //sinfo->_effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+    //sinfo->_effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DAMAGE;
+    sinfo->_effects[0].BasePoints = 100;
+    //sinfo->_effects[0].DieSides = 0;
+    sinfo->_effects[0].BonusMultiplier = 2.f;
+    sinfo->_effects[0].DamageMultiplier = 1.f;
+    sinfo->_effects[0].RealPointsPerLevel = 10.f;
+    //sinfo->_effects[0].ValueMultiplier = 1.f;
+    //sinfo->_effects[0].RadiusEntry = nullptr;
+    sinfo->_effects[0].Amplitude = 2000;
     //26) END BLACK ARROW
 
     //27) DRAIN LIFE
