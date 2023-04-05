@@ -7,6 +7,7 @@
 #include <mutex>
 
 class Creature;
+class GameObject;
 class Map;
 class Player;
 class Unit;
@@ -117,6 +118,8 @@ class TC_GAME_API BotMgr
         static void LoadConfig(bool reload = false);
 
         //onEvent hooks
+        static void OnBotWandererKilled(Creature const* bot, Player* looter);
+        static void OnBotWandererKilled(GameObject* go);
         static void OnBotSpellInterrupt(Unit const* caster, CurrentSpellTypes spellType);
         static void OnBotSpellGo(Unit const* caster, Spell const* spell, bool ok = true);
         static void OnBotOwnerSpellGo(Unit const* caster, Spell const* spell, bool ok = true);
