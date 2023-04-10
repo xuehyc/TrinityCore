@@ -597,8 +597,6 @@ bool Creature::InitEntry(uint32 entry, CreatureData const* data /*= nullptr*/)
     else
         SetObjectScale(cinfo->scale);
 
-    SetHoverHeight(cinfo->HoverHeight);
-
     SetCanDualWield(cinfo->flags_extra & CREATURE_FLAG_EXTRA_USE_OFFHAND_ATTACK);
 
     // checked at loading

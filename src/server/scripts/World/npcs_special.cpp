@@ -1067,7 +1067,8 @@ public:
                                 break;
                         }
 
-                        Start(false, true);
+                        LoadPath((me->GetEntry() << 3) | 2);
+                        Start(false);
                     }
                     else
                         EnterEvadeMode(EvadeReason::Other);                       //something went wrong
